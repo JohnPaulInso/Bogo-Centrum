@@ -472,12 +472,28 @@ input {
   margin: 0 0 24px;
 }
 
+/* (2026-07-13) Enabled scroll & drag marquee across devices, was CSS keyframe */
 .logo-marquee-viewport {
   position: relative;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
   width: 100%;
-  mask-image: linear-gradient(90deg, transparent 0%, #000 8%, #000 92%, transparent 100%);
-  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 8%, #000 92%, transparent 100%);
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  mask-image: linear-gradient(90deg, transparent 0%, #000 6%, #000 94%, transparent 100%);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 6%, #000 94%, transparent 100%);
+}
+
+.logo-marquee-viewport::-webkit-scrollbar {
+  display: none;
+}
+
+.logo-marquee-viewport.is-dragging {
+  cursor: grabbing;
 }
 
 .logo-marquee-track {
@@ -485,20 +501,7 @@ input {
   align-items: center;
   gap: 18px;
   width: max-content;
-  animation: centrum-marquee 34s linear infinite;
-}
-
-.logo-marquee-viewport:hover .logo-marquee-track {
-  animation-play-state: paused;
-}
-
-@keyframes centrum-marquee {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-50%);
-  }
+  padding: 6px 18px;
 }
 
 .carousel-logo-tile {

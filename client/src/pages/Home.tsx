@@ -245,8 +245,81 @@ export default function Home() {
   const [draft, setDraft] = useState<Lot>(seedLots[0]);
   const [inquirySent, setInquirySent] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  // (2026-07-13) Added drag/swipe marquee refs & state, was CSS-only animation
+  const marqueeRef = useRef<HTMLDivElement>(null);
+  const marqueeDragRef = useRef({ active: false, startX: 0, startScroll: 0, moved: 0, paused: false, resumeTimer: 0 });
+  const [marqueeDragging, setMarqueeDragging] = useState(false);
 
   const selectedLot = lots.find(lot => lot.id === selectedLotId) ?? lots[0];
+
+  useEffect(() => {
+    const el = marqueeRef.current;
+    if (!el) return;
+    const initTimer = window.setTimeout(() => {
+      if (el.scrollWidth > 0) el.scrollLeft = el.scrollWidth / 3;
+    }, 60);
+
+    let rafId = 0;
+    const step = () => {
+      const state = marqueeDragRef.current;
+      if (!state.active && !state.paused && el.scrollWidth > 0) {
+        el.scrollLeft += 0.6;
+        const segment = el.scrollWidth / 3;
+        if (el.scrollLeft >= segment * 2) el.scrollLeft -= segment;
+      }
+      rafId = window.requestAnimationFrame(step);
+    };
+    rafId = window.requestAnimationFrame(step);
+    return () => {
+      window.clearTimeout(initTimer);
+      window.clearTimeout(marqueeDragRef.current.resumeTimer);
+      window.cancelAnimationFrame(rafId);
+    };
+  }, []);
+
+  const handleMarqueeScroll = () => {
+    const el = marqueeRef.current;
+    if (!el || el.scrollWidth === 0) return;
+    const segment = el.scrollWidth / 3;
+    if (el.scrollLeft >= segment * 2) {
+      el.scrollLeft -= segment;
+    } else if (el.scrollLeft <= 2) {
+      el.scrollLeft += segment;
+    }
+  };
+
+  const handleMarqueePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (event.pointerType !== "mouse") return;
+    const el = marqueeRef.current;
+    if (!el) return;
+    marqueeDragRef.current.active = true;
+    marqueeDragRef.current.startX = event.clientX;
+    marqueeDragRef.current.startScroll = el.scrollLeft;
+    marqueeDragRef.current.moved = 0;
+    setMarqueeDragging(true);
+    el.setPointerCapture(event.pointerId);
+  };
+
+  const handleMarqueePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    const state = marqueeDragRef.current;
+    if (!state.active || event.pointerType !== "mouse") return;
+    const el = marqueeRef.current;
+    if (!el) return;
+    const delta = event.clientX - state.startX;
+    state.moved = Math.max(state.moved, Math.abs(delta));
+    el.scrollLeft = state.startScroll - delta;
+    handleMarqueeScroll();
+  };
+
+  const endMarqueeDrag = (event?: React.PointerEvent<HTMLDivElement>) => {
+    const state = marqueeDragRef.current;
+    if (!state.active) return;
+    state.active = false;
+    setMarqueeDragging(false);
+    if (event && marqueeRef.current?.hasPointerCapture(event.pointerId)) {
+      marqueeRef.current.releasePointerCapture(event.pointerId);
+    }
+  };
 
   useEffect(() => {
     if (adminOpen) setDraft({ ...selectedLot });
@@ -432,20 +505,48 @@ export default function Home() {
           <div className="container">
             <p className="carousel-label">ESTABLISHED BRANDS &amp; ANCHOR TENANTS AT CENTRUM</p>
           </div>
-          <div className="logo-marquee-viewport">
+          {/* (2026-07-13) Draggable desktop/tablet/mobile marquee, was CSS animation */}
+          <div
+            ref={marqueeRef}
+            className={`logo-marquee-viewport ${marqueeDragging ? "is-dragging" : ""}`}
+            onScroll={handleMarqueeScroll}
+            onPointerDown={handleMarqueePointerDown}
+            onPointerMove={handleMarqueePointerMove}
+            onPointerUp={endMarqueeDrag}
+            onPointerCancel={endMarqueeDrag}
+            onMouseEnter={() => {
+              marqueeDragRef.current.paused = true;
+            }}
+            onMouseLeave={() => {
+              marqueeDragRef.current.paused = false;
+            }}
+            onTouchStart={() => {
+              window.clearTimeout(marqueeDragRef.current.resumeTimer);
+              marqueeDragRef.current.paused = true;
+            }}
+            onTouchEnd={() => {
+              marqueeDragRef.current.resumeTimer = window.setTimeout(() => {
+                marqueeDragRef.current.paused = false;
+              }, 700);
+            }}
+          >
             <div className="logo-marquee-track">
-              {[...carouselBrands, ...carouselBrands].map((item, idx) => (
+              {[...carouselBrands, ...carouselBrands, ...carouselBrands].map((item, idx) => (
                 <button
                   key={`${item.name}-${idx}`}
                   type="button"
                   className="carousel-logo-tile"
                   onClick={() => {
+                    if (marqueeDragRef.current.moved > 6) {
+                      marqueeDragRef.current.moved = 0;
+                      return;
+                    }
                     const found = lots.find(l => l.id === item.lotId);
                     if (found) chooseLot(found);
                     scrollTo("brands");
                   }}
                 >
-                  <img src={item.logo} alt={item.name} />
+                  <img src={item.logo} alt={item.name} draggable={false} />
                   <span>{item.name}</span>
                 </button>
               ))}
