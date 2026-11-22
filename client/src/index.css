@@ -1847,8 +1847,10 @@ input {
   transition: transform 0.18s ease, box-shadow 0.18s ease;
 }
 
+/* (2026-07-13) Enforced 1:1 square ratio for update posters, was 225px height */
 .update-thumb {
-  height: 225px;
+  width: 100%;
+  aspect-ratio: 1 / 1;
   overflow: hidden;
   background: var(--mist);
 }

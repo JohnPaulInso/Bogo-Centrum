@@ -238,7 +238,25 @@ export default function Home() {
   const [lots, setLots] = useState<Lot[]>(seedLots);
   const [activeFilter, setActiveFilter] = useState<Filter>("All Brands");
   const [floor, setFloor] = useState<Floor>("Ground Floor");
-  const [adminOpen, setAdminOpen] = useState(false);
+  // (2026-07-13) Hide Brand Studio from public; unlock via ?admin=1 or Ctrl+Shift+A
+  const [isAdminMode, setIsAdminMode] = useState(
+    () => typeof window !== "undefined" && new URLSearchParams(window.location.search).get("admin") === "1"
+  );
+  const [adminOpen, setAdminOpen] = useState(
+    () => typeof window !== "undefined" && new URLSearchParams(window.location.search).get("admin") === "1"
+  );
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === "a") {
+        event.preventDefault();
+        setIsAdminMode(true);
+        setAdminOpen(value => !value);
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
   const [selectedLotId, setSelectedLotId] = useState("A-101");
   const [menuOpen, setMenuOpen] = useState(false);
   const [lotDropdownOpen, setLotDropdownOpen] = useState(false);
@@ -414,15 +432,18 @@ export default function Home() {
             <a href="#updates" onClick={() => setMenuOpen(false)}>Updates</a>
           </nav>
           <div className="top-actions">
-            <button
-              className={`studio-nav-btn ${adminOpen ? "active" : ""}`}
-              onClick={() => {
-                setAdminOpen(value => !value);
-                scrollTo("map");
-              }}
-            >
-              <Pencil size={14} /> Brand Studio
-            </button>
+            {/* (2026-07-13) Hide Brand Studio button from public navbar, was always visible */}
+            {isAdminMode && (
+              <button
+                className={`studio-nav-btn ${adminOpen ? "active" : ""}`}
+                onClick={() => {
+                  setAdminOpen(value => !value);
+                  scrollTo("map");
+                }}
+              >
+                <Pencil size={14} /> Brand Studio
+              </button>
+            )}
             <button className="accent-button top-cta" onClick={inquire}>
               Inquire to Lease <ArrowRight size={15} />
             </button>
@@ -789,8 +810,9 @@ export default function Home() {
                 <div className="kicker-bar"><span /> PLAN YOUR PRESENCE</div>
                 <h2>Interactive 2D Architectural Site Map</h2>
                 <p className="section-lede">
+                  {/* (2026-07-13) Removed public Brand Studio mention, was shown to visitors */}
                   Explore Building A and Building B across the central parking plaza. Click any unit to inspect its
-                  footprint or open Brand Studio to customize tenant placements live.
+                  tenant details, floor level, and commercial footprint.
                 </p>
               </div>
               <div className="map-selected-pill">
@@ -814,12 +836,14 @@ export default function Home() {
                 <span><i className="legend-dot legend-occupied" /> Occupied</span>
                 <span><i className="legend-dot legend-reserved" /> Reserved</span>
               </div>
-              <button className={`studio-button ${adminOpen ? "active" : ""}`} onClick={() => setAdminOpen(v => !v)}>
-                <PanelRightOpen size={16} /> {adminOpen ? "Close Brand Studio" : "Open Brand Studio"}
-              </button>
+              {isAdminMode && (
+                <button className={`studio-button ${adminOpen ? "active" : ""}`} onClick={() => setAdminOpen(v => !v)}>
+                  <PanelRightOpen size={16} /> {adminOpen ? "Close Brand Studio" : "Open Brand Studio"}
+                </button>
+              )}
             </div>
 
-            <div className={`map-workspace ${adminOpen ? "with-drawer" : ""}`}>
+            <div className={`map-workspace ${isAdminMode && adminOpen ? "with-drawer" : ""}`}>
               <div className="site-map-card">
                 <div className="site-map-canvas">
                   <div className="map-road map-road-top" />
@@ -895,11 +919,11 @@ export default function Home() {
                 </div>
                 <div className="map-footnote">
                   <span><Asterisk size={13} /> Lots are illustrative for leasing planning.</span>
-                  <span>Click any stall to inspect or customize in Brand Studio.</span>
+                  <span>Click any unit on the floor plan to view its details.</span>
                 </div>
               </div>
 
-              {adminOpen && (
+              {isAdminMode && adminOpen && (
                 <aside className="admin-drawer">
                   <div className="drawer-head">
                     <div>
@@ -1159,21 +1183,25 @@ export default function Home() {
             <p className="footer-contact-line"><Phone size={14} /> +63 32 255 0880</p>
             <p className="footer-contact-line"><Mail size={14} /> leasing@bogocitycentrum.ph</p>
             <p className="footer-contact-line"><MapPin size={14} /> Taytayan, Bogo City, Cebu</p>
-            <button
-              className="footer-studio-btn"
-              onClick={() => {
-                setAdminOpen(true);
-                scrollTo("map");
-              }}
-            >
-              <Pencil size={13} /> Open Admin Brand Studio
-            </button>
+            {/* (2026-07-13) Hide footer Brand Studio button from public, was visible */}
+            {isAdminMode && (
+              <button
+                className="footer-studio-btn"
+                onClick={() => {
+                  setAdminOpen(true);
+                  scrollTo("map");
+                }}
+              >
+                <Pencil size={13} /> Open Admin Brand Studio
+              </button>
+            )}
           </div>
         </div>
         <div className="footer-bottom">
           <div className="container footer-bottom-inner">
             <span>© 2026 Bogo City Centrum. All rights reserved.</span>
-            <span>Taytayan, Bogo City, Cebu · Commercial Leasing &amp; Brand Directory</span>
+            {/* (2026-07-13) Added creator credit in footer bottom, was location tagline */}
+            <span>Made by John Paul Inso @bainest &amp; John Errol Duazo</span>
           </div>
         </div>
       </footer>
