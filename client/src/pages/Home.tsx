@@ -255,19 +255,6 @@ function CentrumLogo({ light = false }: { light?: boolean }) {
   );
 }
 
-// (2026-07-13) Added friendly top-down SVG tree drawing for simple readable sitemap
-function MapTreeIcon({ size = 18 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 28 28" fill="none" aria-hidden="true" className="svg-map-tree">
-      <circle cx="14" cy="14" r="11" fill="#4aa628" />
-      <circle cx="10" cy="11" r="6" fill="#63c43c" />
-      <circle cx="18" cy="12" r="5.5" fill="#58b92e" />
-      <circle cx="14" cy="18" r="5.5" fill="#3f9421" />
-      <circle cx="11.5" cy="10" r="2.5" fill="#8ee368" />
-    </svg>
-  );
-}
-
 function StatusBadge({ status }: { status: Status }) {
   return (
     <span className={`status-badge status-${status}`}>
@@ -513,30 +500,35 @@ export default function Home() {
       </header>
 
       <main>
-        {/* Full-Bleed Architectural Hero */}
+        {/* (2026-07-13) Switched hero to Centrum Landing Jp.png with refined copy & trust row */}
         <section id="home" className="hero-banner">
           <div className="hero-bg-media" aria-hidden="true">
-            <img src="./images/centrum-night.jpg" alt="Bogo City Centrum illuminated exterior" />
+            <img src="./images/centrum-landing-jp.png" alt="Bogo City Centrum exterior in Taytayan, Bogo City" />
             <div className="hero-scrim" />
           </div>
           <div className="container hero-content">
             <div className="hero-copy-block">
-              <p className="hero-location-label">
-                <MapPin size={14} /> TAYTAYAN, BOGO CITY, CEBU · THE LIFESTYLE MALL OF THE NORTH
-              </p>
+              {/* (2026-07-13) Simplified hero location label, was bordered dual-text pill */}
+              <div className="hero-location-pill">
+                <MapPin size={14} />
+                <span>TAYTAYAN, BOGO CITY, CEBU</span>
+              </div>
+              {/* (2026-07-13) Line-broke "for" onto line 3 so headline stays clear of building */}
               <h1>
-                Northern Cebu&apos;s <span className="hero-accent">Commercial Hub</span> for Everyday Brands
+                Northern Cebu&apos;s<br />
+                <span className="hero-accent">Commercial Hub</span><br />
+                for Everyday Brands
               </h1>
               <p className="hero-subtitle">
-                Bringing convenience, healthcare, banking, retail, and wellness together across two parallel commercial
-                wings surrounding a spacious central parking plaza.
+                Shopping, healthcare, banking, dining, and essential services united across two parallel commercial
+                wings with wide central parking.
               </p>
               <div className="hero-cta-row">
-                <button className="accent-button" onClick={() => scrollTo("brands")}>
-                  Explore Available Lots <ArrowRight size={16} />
+                <button className="accent-button hero-primary-cta" onClick={() => scrollTo("map")}>
+                  Explore 2D Site Map <ArrowRight size={16} />
                 </button>
-                <button className="ghost-light-button" onClick={() => scrollTo("map")}>
-                  <MapPin size={16} /> View 2D Site Map
+                <button className="ghost-light-button" onClick={() => scrollTo("brands")}>
+                  Browse Brand Directory
                 </button>
               </div>
             </div>
@@ -911,13 +903,9 @@ export default function Home() {
               <div className="site-map-card">
                 <div className="street-map-scroll">
                   <div className="street-map-board">
-                    {/* Left Vertical National Highway (Taytayan) */}
+                    {/* (2026-07-13) Removed all trees; clean highway curb, was green tree strip */}
                     <div className="highway-column" aria-label="Taytayan National Highway">
-                      <div className="highway-trees">
-                        {Array.from({ length: 6 }).map((_, i) => (
-                          <MapTreeIcon key={i} size={18} />
-                        ))}
-                      </div>
+                      <div className="highway-curb" aria-hidden="true" />
                       <div className="highway-asphalt">
                         <span className="highway-name">TAYTAYAN HIGHWAY</span>
                         <div className="highway-car car-down" aria-hidden="true" />
@@ -925,7 +913,7 @@ export default function Home() {
                       </div>
                     </div>
 
-                    {/* Right Side: Building A (2F + 1F), Central Parking with Plant Boxes & U-Turn, Building B (1F + 2F) */}
+                    {/* Right Side: Building A (2F + 1F), Central Parking, Building B (1F + 2F) */}
                     <div className="compound-column">
                       {(floor === "All Floors" || floor === "Second Floor") && (
                         <div className="wing-floor-block wing-a-2f">
@@ -944,6 +932,7 @@ export default function Home() {
                                   </div>
                                 );
                               }
+                              const shortLabel = lot.brand === "LCTC Foundation, Inc." ? "LCTC" : lot.brand;
                               return (
                                 <button
                                   key={lot.id}
@@ -954,11 +943,23 @@ export default function Home() {
                                 >
                                   {isVacantSelected && <span className="picked-check"><Check size={11} /></span>}
                                   {lot.logo ? (
-                                    <img className="unit-logo-img" src={lot.logo} alt={lot.brand} />
+                                    <>
+                                      <img className="unit-logo-img" src={lot.logo} alt={lot.brand} />
+                                      <span className="unit-sub">{shortLabel}</span>
+                                    </>
+                                  ) : lot.status === "available" ? (
+                                    <>
+                                      <strong className="vacant-title">{isVacantSelected ? "Selected" : "Vacant"}</strong>
+                                      <span className="vacant-id">{lot.id}</span>
+                                    </>
                                   ) : (
-                                    <strong className="unit-name-text">{lot.status === "available" ? "Vacant" : lot.brand}</strong>
+                                    <>
+                                      <strong className="unit-name-text">{lot.brand}</strong>
+                                      <span className="unit-sub">
+                                        {lot.units} {lot.units === 1 ? "Unit" : "Units"}
+                                      </span>
+                                    </>
                                   )}
-                                  <span className="unit-sub">{lot.status === "available" ? lot.id : lot.brand}</span>
                                 </button>
                               );
                             })}
@@ -983,6 +984,7 @@ export default function Home() {
                                   </div>
                                 );
                               }
+                              const shortLabel = lot.brand === "Palawan Pawnshop" ? "Palawan" : lot.brand;
                               return (
                                 <button
                                   key={lot.id}
@@ -993,11 +995,16 @@ export default function Home() {
                                 >
                                   {isVacantSelected && <span className="picked-check"><Check size={11} /></span>}
                                   {lot.logo ? (
-                                    <img className="unit-logo-img" src={lot.logo} alt={lot.brand} />
+                                    <>
+                                      <img className="unit-logo-img" src={lot.logo} alt={lot.brand} />
+                                      <span className="unit-sub">{shortLabel}</span>
+                                    </>
                                   ) : (
-                                    <strong className="unit-name-text">{lot.status === "available" ? "Vacant" : lot.brand}</strong>
+                                    <>
+                                      <strong className="vacant-title">{isVacantSelected ? "Selected" : "Vacant"}</strong>
+                                      <span className="vacant-id">{lot.id}</span>
+                                    </>
                                   )}
-                                  <span className="unit-sub">{lot.status === "available" ? lot.id : lot.brand}</span>
                                 </button>
                               );
                             })}
@@ -1005,70 +1012,33 @@ export default function Home() {
                         </div>
                       )}
 
-                      {/* Central Parking Plaza with Plant Boxes, Aisles at 1st CR & After Palawan, and U-Turn */}
+                      {/* (2026-07-13) Gray plant boxes without trees; last box spans to last CR */}
                       <div className="street-parking-corridor">
                         <div className="gate-column">
                           <div className="gate-pill gate-exit">
                             <ArrowLeft size={13} /> EXIT
                           </div>
                           <div className="gate-pill gate-entrance">
-                            ENTER <ArrowRight size={13} />
+                            ENTRANCE <ArrowRight size={13} />
                           </div>
                         </div>
 
                         <div className="parking-asphalt-body">
-                          <div className="parking-lane-row">
-                            <span className="lane-arrow"><ArrowLeft size={12} /> Exit Lane</span>
-                            <div className="parking-stripes-row">
-                              {Array.from({ length: 16 }).map((_, i) => <i key={i} />)}
-                            </div>
+                          <div className="parking-stripes-row">
+                            {Array.from({ length: 18 }).map((_, i) => <i key={i} />)}
                           </div>
 
-                          {/* 12-col aligned Plant Boxes + Open Aisles (Col 5 = 1st CR, Col 9 = After Palawan) */}
                           <div className="median-grid-12">
-                            <div className="plant-box" style={{ gridColumn: "span 4" }}>
-                              <MapTreeIcon size={17} />
-                              <span>Plant Box</span>
-                              <MapTreeIcon size={17} />
-                            </div>
-                            <div className="aisle-gap" style={{ gridColumn: "span 1" }}>
-                              <span>Aisle</span>
-                            </div>
-                            <div className="plant-box" style={{ gridColumn: "span 3" }}>
-                              <MapTreeIcon size={17} />
-                              <span>Plant Box</span>
-                              <MapTreeIcon size={17} />
-                            </div>
-                            <div className="aisle-gap" style={{ gridColumn: "span 1" }}>
-                              <span>Aisle</span>
-                            </div>
-                            <div className="plant-box" style={{ gridColumn: "span 3" }}>
-                              <MapTreeIcon size={17} />
-                              <span>Plant Box</span>
-                              <MapTreeIcon size={17} />
-                            </div>
+                            <div className="plant-island" style={{ gridColumn: "span 4" }} aria-hidden="true" />
+                            <div className="road-cutout" style={{ gridColumn: "span 1" }} aria-hidden="true" />
+                            <div className="plant-island" style={{ gridColumn: "span 3" }} aria-hidden="true" />
+                            <div className="road-cutout" style={{ gridColumn: "span 1" }} aria-hidden="true" />
+                            <div className="plant-island" style={{ gridColumn: "span 3" }} aria-hidden="true" />
                           </div>
 
-                          <div className="parking-lane-row">
-                            <span className="lane-arrow">Enter Lane <ArrowRight size={12} /></span>
-                            <div className="parking-stripes-row">
-                              {Array.from({ length: 16 }).map((_, i) => <i key={i} />)}
-                            </div>
+                          <div className="parking-stripes-row">
+                            {Array.from({ length: 18 }).map((_, i) => <i key={i} />)}
                           </div>
-                        </div>
-
-                        {/* U-Turn Loop at the Back End of Parking */}
-                        <div className="uturn-zone" aria-label="Parking U-Turn area">
-                          <svg width="32" height="44" viewBox="0 0 32 44" fill="none" aria-hidden="true">
-                            <path
-                              d="M6 34 H18 C24 34 27 29 27 22 C27 15 24 10 18 10 H8"
-                              stroke="#0a2548"
-                              strokeWidth="3"
-                              strokeLinecap="round"
-                            />
-                            <path d="M12 5 L6 10 L12 15" stroke="#0a2548" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-                          </svg>
-                          <span>U-TURN</span>
                         </div>
                       </div>
 
@@ -1099,11 +1069,16 @@ export default function Home() {
                                 >
                                   {isVacantSelected && <span className="picked-check"><Check size={11} /></span>}
                                   {lot.logo ? (
-                                    <img className="unit-logo-img" src={lot.logo} alt={lot.brand} />
+                                    <>
+                                      <img className="unit-logo-img" src={lot.logo} alt={lot.brand} />
+                                      <span className="unit-sub">{lot.brand}</span>
+                                    </>
                                   ) : (
-                                    <strong className="unit-name-text">{lot.status === "available" ? "Vacant" : lot.brand}</strong>
+                                    <>
+                                      <strong className="vacant-title">{isVacantSelected ? "Selected" : "Vacant"}</strong>
+                                      <span className="vacant-id">{lot.id}</span>
+                                    </>
                                   )}
-                                  <span className="unit-sub">{lot.status === "available" ? lot.id : lot.brand}</span>
                                 </button>
                               );
                             })}
@@ -1137,8 +1112,8 @@ export default function Home() {
                                   onClick={() => chooseLot(lot)}
                                 >
                                   {isVacantSelected && <span className="picked-check"><Check size={11} /></span>}
-                                  <strong className="unit-name-text">Vacant</strong>
-                                  <span className="unit-sub">{lot.id}</span>
+                                  <strong className="vacant-title">{isVacantSelected ? "Selected" : "Vacant"}</strong>
+                                  <span className="vacant-id">{lot.id}</span>
                                 </button>
                               );
                             })}
@@ -1149,12 +1124,12 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* Prospective Tenant Multi-Unit Selection Bar */}
-                {selectedVacantLots.length > 0 && (
+                {/* (2026-07-13) Interactive store inspector + multi-unit leasing bar, was vacant-only bar */}
+                {selectedVacantLots.length > 0 ? (
                   <div className="vacant-selection-bar">
                     <div className="vacant-selection-info">
                       <strong>
-                        {selectedVacantLots.length} Vacant {selectedVacantLots.length === 1 ? "Unit" : "Units"} Selected
+                        {selectedVacantLots.length} Open {selectedVacantLots.length === 1 ? "Unit" : "Units"} Selected
                       </strong>
                       <span>
                         {selectedVacantLots.map(l => l.id).join(" + ")} · Est.{" "}
@@ -1169,6 +1144,28 @@ export default function Home() {
                         Inquire for Selected {selectedVacantLots.length === 1 ? "Unit" : "Units"} <ArrowRight size={15} />
                       </button>
                     </div>
+                  </div>
+                ) : (
+                  <div className="store-inspector-bar" key={selectedLot.id}>
+                    <div className="inspector-left">
+                      {selectedLot.logo ? (
+                        <div className="inspector-logo">
+                          <img src={selectedLot.logo} alt={selectedLot.brand} />
+                        </div>
+                      ) : (
+                        <div className="inspector-icon"><Store size={18} /></div>
+                      )}
+                      <div>
+                        <strong>{selectedLot.brand}</strong>
+                        <span>
+                          {selectedLot.building} · {selectedLot.floor === "Ground Floor" ? "1st Floor" : "2nd Floor"} ·{" "}
+                          {selectedLot.category} · {selectedLot.units} {selectedLot.units === 1 ? "Unit" : "Units"}
+                        </span>
+                      </div>
+                    </div>
+                    <button type="button" className="inspector-action" onClick={() => scrollTo("brands")}>
+                      View Directory <ArrowRight size={14} />
+                    </button>
                   </div>
                 )}
 

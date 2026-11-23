@@ -263,14 +263,14 @@ input {
   cursor: pointer;
 }
 
-/* Grounded Architectural Hero */
+/* (2026-07-13) Darker deep-navy left gradient for simpler, cleaner hero contrast */
 .hero-banner {
   position: relative;
-  min-height: 580px;
+  min-height: 590px;
   display: flex;
   align-items: center;
-  padding: 96px 0 144px;
-  background: var(--navy-deep);
+  padding: 88px 0 134px;
+  background: #041226;
   overflow: hidden;
 }
 
@@ -284,17 +284,19 @@ input {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center 42%;
+  object-position: right center;
 }
 
 .hero-scrim {
   position: absolute;
   inset: 0;
   background: linear-gradient(
-    94deg,
-    rgba(6, 24, 48, 0.92) 0%,
-    rgba(10, 37, 72, 0.78) 44%,
-    rgba(10, 37, 72, 0.22) 100%
+    90deg,
+    rgba(3, 14, 30, 0.96) 0%,
+    rgba(5, 20, 44, 0.88) 32%,
+    rgba(6, 26, 56, 0.56) 50%,
+    rgba(6, 26, 56, 0.14) 68%,
+    rgba(6, 26, 56, 0) 82%
   );
 }
 
@@ -305,45 +307,85 @@ input {
 }
 
 .hero-copy-block {
-  max-width: 600px;
+  max-width: 555px;
 }
 
-.hero-location-label {
+/* (2026-07-13) Simplified plain eyebrow label, was glass bordered pill */
+.hero-location-pill {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  margin: 0 0 16px;
+  margin-bottom: 14px;
   font-size: 11.5px;
   font-weight: 800;
   letter-spacing: 0.14em;
-  color: var(--logo-sky);
+  color: #bce4ff;
+}
+
+.hero-location-pill svg {
+  color: #7ee362;
+  flex-shrink: 0;
 }
 
 .hero-copy-block h1 {
   margin: 0;
-  font-size: clamp(38px, 4.8vw, 56px);
+  font-size: clamp(38px, 4.6vw, 56px);
   font-weight: 800;
-  line-height: 1.08;
+  line-height: 1.07;
   letter-spacing: -0.03em;
   color: #ffffff;
+  text-shadow: 0 2px 18px rgba(4, 24, 58, 0.35);
 }
 
 .hero-accent {
-  color: #79d852;
+  color: #7ee362;
 }
 
 .hero-subtitle {
-  margin: 20px 0 32px;
+  margin: 18px 0 28px;
   font-size: 16px;
-  line-height: 1.72;
-  color: rgba(235, 244, 255, 0.88);
-  max-width: 520px;
+  line-height: 1.7;
+  color: rgba(235, 245, 255, 0.94);
+  max-width: 470px;
+  text-shadow: 0 1px 8px rgba(4, 24, 58, 0.28);
 }
 
 .hero-cta-row {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
+}
+
+.hero-cta-row .ghost-light-button {
+  background: rgba(4, 18, 38, 0.58);
+  border-color: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(8px);
+}
+
+.hero-primary-cta {
+  height: 48px;
+  padding: 0 24px;
+  box-shadow: 0 8px 22px rgba(6, 30, 68, 0.28);
+}
+
+.hero-trust-row {
+  margin-top: 26px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(235, 245, 255, 0.92);
+}
+
+.hero-trust-row span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hero-trust-row svg {
+  color: #84e45d;
 }
 
 /* Floating 4-Pillar Trust Strip */
@@ -1222,33 +1264,24 @@ input {
   background: #edf2f7;
 }
 
+/* (2026-07-13) Clean highway curb without trees, was green tree column */
 .street-map-board {
   min-width: 980px;
   display: grid;
-  grid-template-columns: 74px minmax(0, 1fr);
+  grid-template-columns: 62px minmax(0, 1fr);
   background: #eef3f8;
 }
 
-/* Left Vertical National Highway */
 .highway-column {
   display: grid;
-  grid-template-columns: 22px 52px;
-  background: #e6eef5;
+  grid-template-columns: 10px 52px;
+  background: #dfe6ee;
   border-right: 2px solid #cbd7e4;
 }
 
-.highway-trees {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-around;
-  align-items: center;
-  padding: 10px 0;
-  background: #e3f2df;
-}
-
-.svg-map-tree {
-  flex-shrink: 0;
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.16));
+.highway-curb {
+  background: #d5dde7;
+  border-right: 1px solid #c2cdd9;
 }
 
 .highway-asphalt {
@@ -1312,17 +1345,24 @@ input {
   gap: 8px;
 }
 
+/* (2026-07-13) Replaced colored top borders with subtle timber/concrete tones */
 .wing-floor-block {
   background: #ffffff;
-  border: 1px solid #d4e0ec;
+  border: 1px solid #e3e0da;
   border-radius: 10px;
   padding: 6px 10px 8px;
+  box-shadow: 0 2px 6px rgba(32, 37, 45, 0.04);
 }
 
-.wing-a-2f { border-top: 3px solid var(--logo-blue-deep); }
-.wing-a-1f { border-top: 3px solid var(--logo-blue); }
-.wing-b-1f { border-top: 3px solid var(--logo-sky); }
-.wing-b-2f { border-top: 3px solid var(--logo-green); }
+.wing-a-2f,
+.wing-b-2f {
+  background: #fcfaf7;
+}
+
+.wing-a-1f,
+.wing-b-1f {
+  background: #ffffff;
+}
 
 .wing-floor-head {
   display: flex;
@@ -1333,30 +1373,50 @@ input {
 }
 
 .wing-floor-head strong {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
   font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.1em;
-  color: var(--navy);
+  color: #272d36;
+}
+
+.wing-floor-head strong::before {
+  content: "";
+  width: 6px;
+  height: 12px;
+  border-radius: 2px;
+  background: #c07632;
+  opacity: 0.78;
+}
+
+.wing-a-1f .wing-floor-head strong::before,
+.wing-b-1f .wing-floor-head strong::before {
+  background: #3a424d;
+  opacity: 0.65;
 }
 
 .wing-floor-head span {
   font-size: 11px;
-  color: var(--muted);
+  color: #6b7280;
   font-weight: 600;
 }
 
+/* (2026-07-13) Slightly taller tiles & flat matte gray plant boxes, was 54px/3D */
 .unit-grid-12 {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
-  gap: 5px;
+  gap: 6px;
 }
 
+/* (2026-07-13) Increased tile height to 70px for breathing room, was 62px */
 .unit-tile {
   position: relative;
-  min-height: 52px;
-  padding: 4px 4px;
-  border-radius: 7px;
-  border: 1.5px solid #d6e2ee;
+  min-height: 70px;
+  padding: 7px 6px;
+  border-radius: 8px;
+  border: 1px solid #e4e8ee;
   background: #ffffff;
   display: flex;
   flex-direction: column;
@@ -1365,27 +1425,49 @@ input {
   gap: 2px;
   text-align: center;
   cursor: pointer;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 1px 2px rgba(15, 30, 50, 0.04);
+  transition: transform 0.14s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+}
+
+.unit-tile:active:not(.unit-utility) {
+  transform: scale(0.95);
 }
 
 .unit-tile.occupied {
   background: #ffffff;
-  border-color: #cbd9e8;
+  border-color: #e2e8f0;
 }
 
+/* (2026-07-13) Restored soft green Vacant tiles, was neutral gray */
 .unit-tile.available {
   background: #eef9ea;
-  border-color: #a9db96;
+  border: 1.5px solid #a9db96;
+  box-shadow: none;
+}
+
+.vacant-title {
+  font-size: 11.5px;
+  font-weight: 800;
   color: var(--logo-green-hover);
+  line-height: 1.1;
+}
+
+.vacant-id {
+  font-size: 10px;
+  font-weight: 700;
+  color: #526375;
 }
 
 .unit-tile.vacant-picked {
   background: var(--logo-green);
-  border-color: var(--logo-green-hover);
+  border: 1.5px solid var(--logo-green-hover);
   color: #ffffff;
-  box-shadow: 0 3px 10px rgba(88, 185, 46, 0.3);
+  box-shadow: 0 4px 12px rgba(88, 185, 46, 0.28);
+  animation: unit-pop 0.22s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+.unit-tile.vacant-picked .vacant-title,
+.unit-tile.vacant-picked .vacant-id,
 .unit-tile.vacant-picked .unit-name-text,
 .unit-tile.vacant-picked .unit-sub {
   color: #ffffff;
@@ -1393,17 +1475,131 @@ input {
 
 .unit-tile.focused {
   border-color: var(--logo-blue);
-  box-shadow: 0 0 0 2.5px rgba(45, 108, 181, 0.24);
+  box-shadow: 0 0 0 3px rgba(45, 108, 181, 0.18), 0 4px 12px rgba(15, 30, 50, 0.08);
+  animation: unit-pop 0.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .unit-tile.unit-utility {
-  background: #eef2f6;
-  border: 1px dashed #b8c6d4;
-  color: #475569;
+  background: #e9edf3;
+  border: 1px solid transparent;
+  box-shadow: none;
+  color: #7b8898;
   cursor: default;
-  font-size: 10px;
-  font-weight: 800;
+  font-size: 9.5px;
+  font-weight: 700;
   line-height: 1.1;
+}
+
+@keyframes unit-pop {
+  0% { transform: scale(0.95); }
+  60% { transform: scale(1.03); }
+  100% { transform: scale(1); }
+}
+
+.store-inspector-bar {
+  margin-top: 12px;
+  padding: 11px 16px;
+  border-radius: 10px;
+  background: #ffffff;
+  border: 1px solid #dfe6ef;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  animation: inspector-fade 0.2s ease;
+}
+
+@keyframes inspector-fade {
+  from { opacity: 0.4; transform: translateY(3px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.inspector-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.inspector-logo {
+  width: 56px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: #ffffff;
+  padding: 4px 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.inspector-logo img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.inspector-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  background: var(--mist);
+  color: var(--logo-blue);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.inspector-left strong {
+  display: block;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.inspector-left span {
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+.inspector-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 13px;
+  border-radius: 7px;
+  border: 1px solid var(--line);
+  background: var(--mist);
+  color: var(--logo-blue-deep);
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* (2026-07-13) Fixed unreadable hover on selected vacant tile, was white on pale green */
+@media (hover: hover) {
+  .unit-tile:not(.unit-utility):not(.vacant-picked):hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(15, 30, 50, 0.09);
+    border-color: var(--logo-sky);
+  }
+  .unit-tile.available:not(.vacant-picked):hover {
+    background: #eaf7e5;
+    border-color: var(--logo-green);
+  }
+  .unit-tile.vacant-picked:hover {
+    transform: translateY(-2px);
+    background: var(--logo-green-hover);
+    border-color: var(--logo-green-hover);
+    color: #ffffff;
+  }
+  .inspector-action:hover {
+    background: var(--logo-sky-soft);
+    border-color: var(--logo-sky);
+  }
 }
 
 .unit-logo-img {
@@ -1451,16 +1647,16 @@ input {
   justify-content: center;
 }
 
-/* Central Parking Corridor with Plant Boxes, Aisles & U-Turn */
+/* (2026-07-13) Slightly taller parking corridor, was 8px padding */
 .street-parking-corridor {
   display: grid;
-  grid-template-columns: 92px minmax(0, 1fr) 68px;
-  gap: 8px;
-  align-items: stretch;
-  background: #d8e1eb;
-  border: 1px solid #c2d0df;
+  grid-template-columns: 108px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  background: #dce3ec;
+  border: 1px solid #cad4e0;
   border-radius: 10px;
-  padding: 7px 10px;
+  padding: 11px 12px;
 }
 
 .gate-column {
@@ -1496,34 +1692,17 @@ input {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 5px;
-}
-
-.parking-lane-row {
-  display: grid;
-  grid-template-columns: 82px minmax(0, 1fr);
-  align-items: center;
-  gap: 8px;
-}
-
-.lane-arrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  font-size: 10px;
-  font-weight: 800;
-  color: var(--navy);
-  white-space: nowrap;
+  gap: 6px;
 }
 
 .parking-stripes-row {
   display: grid;
-  grid-template-columns: repeat(16, 1fr);
-  gap: 4px;
+  grid-template-columns: repeat(18, 1fr);
+  gap: 5px;
 }
 
 .parking-stripes-row i {
-  height: 12px;
+  height: 13px;
   border-left: 1.5px solid rgba(255, 255, 255, 0.85);
   border-right: 1.5px solid rgba(255, 255, 255, 0.85);
   background: rgba(255, 255, 255, 0.25);
@@ -1537,60 +1716,18 @@ input {
   align-items: center;
 }
 
-.plant-box {
-  height: 26px;
-  border-radius: 999px;
-  background: #e2f5dc;
-  border: 1.5px solid #96d280;
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-  padding: 0 8px;
-}
-
-.plant-box span {
-  font-size: 10px;
-  font-weight: 800;
-  color: #2f7a16;
-  letter-spacing: 0.03em;
-}
-
-.aisle-gap {
-  height: 26px;
+/* (2026-07-13) Flat plain gray plant boxes, was 3D gradient with inset shadow */
+.plant-island {
+  height: 18px;
   border-radius: 6px;
-  background: repeating-linear-gradient(90deg, #ffffff 0 5px, #cbd5e1 5px 10px);
-  border: 1px solid #94a3b8;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  background: #bcc6d2;
+  border: 1px solid #aeb9c7;
+  box-shadow: none;
 }
 
-.aisle-gap span {
-  font-size: 9px;
-  font-weight: 800;
-  color: var(--navy);
-  background: rgba(255, 255, 255, 0.9);
-  padding: 1px 5px;
-  border-radius: 4px;
-}
-
-.uturn-zone {
-  background: #eef4fa;
-  border: 1.5px dashed #6482a3;
-  border-radius: 8px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 2px;
-  padding: 4px;
-}
-
-.uturn-zone span {
-  font-size: 9.5px;
-  font-weight: 800;
-  letter-spacing: 0.05em;
-  color: var(--navy);
+.road-cutout {
+  height: 18px;
+  background: transparent;
 }
 
 /* Prospective Tenant Multi-Unit Selection Bar */
