@@ -9,6 +9,7 @@ import {
   Check,
   ChevronDown,
   Clock,
+  ExternalLink,
   Landmark,
   Mail,
   MapPin,
@@ -164,6 +165,102 @@ const brandDetails: Record<string, { category: string; area: number; badge: stri
   "BPO Company": { category: "Corporate / BPO Office", area: 210, badge: "BPO", tone: "blue" },
 };
 
+// (2026-07-13) Added Google branch hours, descriptions & photos for store modal
+type BranchProfile = {
+  hours: string;
+  days: string;
+  description: string;
+  photo: string;
+  mapsQuery: string;
+};
+
+const branchProfiles: Record<string, BranchProfile> = {
+  "7-Eleven": {
+    hours: "Open 24 Hours",
+    days: "Monday – Sunday",
+    description: "24/7 convenience store at the Building A highway corner offering fresh snacks, beverages, bills payment, and everyday essentials.",
+    photo: "./images/centrum-corner-7eleven.jpg",
+    mapsQuery: "7-Eleven Bogo City Centrum Taytayan Bogo City Cebu",
+  },
+  "Rose Pharmacy": {
+    hours: "8:00 AM – 8:00 PM",
+    days: "Monday – Sunday",
+    description: "Trusted Philippine drugstore at Building A Ground Floor offering prescription medicines, OTC healthcare, and personal care items.",
+    photo: "./images/centrum-night.jpg",
+    mapsQuery: "Rose Pharmacy Bogo City Centrum Taytayan Bogo City Cebu",
+  },
+  "MR.DIY": {
+    hours: "9:00 AM – 7:00 PM",
+    days: "Monday – Sunday",
+    description: "Three-unit home improvement and variety anchor on Building A 2nd Floor carrying hardware, household goods, stationery, and everyday finds.",
+    photo: "./images/centrum-night.jpg",
+    mapsQuery: "MR.DIY Bogo City Centrum Taytayan Bogo City Cebu",
+  },
+  LandBank: {
+    hours: "8:30 AM – 4:00 PM (ATM 24/7)",
+    days: "Monday – Friday",
+    description: "Full-service Land Bank of the Philippines branch at Building A Ground Floor providing deposits, remittances, loans, and 24/7 ATM access.",
+    photo: "./images/centrum-day-facade.jpg",
+    mapsQuery: "LandBank Bogo City Centrum Taytayan Bogo City Cebu",
+  },
+  "Palawan Pawnshop": {
+    hours: "8:00 AM – 5:30 PM",
+    days: "Monday – Sunday",
+    description: "Palawan Pawnshop & Palawan Express Pera Padala branch offering fast domestic remittances, pawning, bills payment, and e-loading.",
+    photo: "./images/centrum-day-facade.jpg",
+    mapsQuery: "Palawan Pawnshop Bogo City Centrum Taytayan Bogo City Cebu",
+  },
+  "Robinsons Supermarket": {
+    hours: "8:00 AM – 8:00 PM",
+    days: "Monday – Sunday",
+    description: "Three-unit anchor grocery destination on Building B Ground Floor offering fresh produce, pantry staples, and household supplies.",
+    photo: "./images/centrum-day-facade.jpg",
+    mapsQuery: "Bogo City Centrum Taytayan Bogo City Cebu",
+  },
+  "Sun Savings": {
+    hours: "8:00 AM – 5:00 PM",
+    days: "Monday – Friday",
+    description: "Sun Savings Bank Bogo Branch-Lite Unit at Building B Ground Floor serving personal savings, salary loans, and business banking.",
+    photo: "./images/news-sunsavings.jpg",
+    mapsQuery: "Sun Savings Bank Bogo City Centrum Taytayan Bogo City Cebu",
+  },
+  AFPSLAI: {
+    hours: "8:00 AM – 5:00 PM",
+    days: "Monday – Friday",
+    description: "Armed Forces and Police Savings & Loan Association satellite office on Building A 2nd Floor serving members across Northern Cebu.",
+    photo: "./images/news-afpslai.jpg",
+    mapsQuery: "AFPSLAI Bogo City Centrum Taytayan Bogo City Cebu",
+  },
+  "Nuat Thai": {
+    hours: "12:00 PM – 12:00 AM",
+    days: "Monday – Sunday",
+    description: "Relaxing foot and body massage wellness studio on Building A 2nd Floor offering traditional Thai massage and aromatherapy.",
+    photo: "./images/promo-lifestyle.jpg",
+    mapsQuery: "Nuat Thai Bogo City Centrum Taytayan Bogo City Cebu",
+  },
+  DermaSure: {
+    hours: "9:00 AM – 6:00 PM",
+    days: "Monday – Saturday",
+    description: "DermaSure Medical Aesthetics and Wellness Center on Building A 2nd Floor offering dermatological care and skin wellness treatments.",
+    photo: "./images/centrum-day-facade.jpg",
+    mapsQuery: "DermaSure Bogo City Centrum Taytayan Bogo City Cebu",
+  },
+  "LCTC Foundation, Inc.": {
+    hours: "8:00 AM – 5:00 PM",
+    days: "Monday – Friday",
+    description: "Community and educational foundation office located on Building A 2nd Floor serving Northern Cebu outreach and programs.",
+    photo: "./images/news-lctc.jpg",
+    mapsQuery: "LCTC Foundation Bogo City Centrum Taytayan Bogo City Cebu",
+  },
+  "BPO Company": {
+    hours: "24/7 Corporate Operations",
+    days: "Monday – Sunday",
+    description: "Three-unit corporate BPO and office operations hub located on Building A 2nd Floor.",
+    photo: "./images/centrum-day-facade.jpg",
+    mapsQuery: "Bogo City Centrum Taytayan Bogo City Cebu",
+  },
+};
+
 const spaceCategories: { title: string; subtitle: string; tag: string; image: string; filter: Filter }[] = [
   {
     title: "Convenience & Pharmacy",
@@ -290,7 +387,23 @@ export default function Home() {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
   const [selectedLotId, setSelectedLotId] = useState("A-101");
+  // (2026-07-13) Modal state for clicked business; null on load so zero sticky outline
+  const [activeStoreLot, setActiveStoreLot] = useState<Lot | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+
+  useEffect(() => {
+    if (!activeStoreLot) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onEsc = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setActiveStoreLot(null);
+    };
+    window.addEventListener("keydown", onEsc);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener("keydown", onEsc);
+    };
+  }, [activeStoreLot]);
   const [lotDropdownOpen, setLotDropdownOpen] = useState(false);
   const [draft, setDraft] = useState<Lot>(seedLots[0]);
   const [inquirySent, setInquirySent] = useState(false);
@@ -445,7 +558,11 @@ export default function Home() {
   const chooseLot = (lot: Lot) => {
     if (lot.isUtility) return;
     setSelectedLotId(lot.id);
-    if (lot.status === "available") toggleVacantSelection(lot);
+    if (lot.status === "available") {
+      toggleVacantSelection(lot);
+    } else if (lot.status === "occupied") {
+      setActiveStoreLot(lot);
+    }
     if (adminOpen) setDraft({ ...lot });
   };
 
@@ -901,6 +1018,10 @@ export default function Home() {
 
             <div className={`map-workspace ${isAdminMode && adminOpen ? "with-drawer" : ""}`}>
               <div className="site-map-card">
+                {/* (2026-07-13) Added mobile swipe indicator above 2D map, was desktop-only */}
+                <div className="map-mobile-swipe-hint" aria-hidden="true">
+                  <ArrowLeft size={13} /> Swipe map left or right to view all units <ArrowRight size={13} />
+                </div>
                 <div className="street-map-scroll">
                   <div className="street-map-board">
                     {/* (2026-07-13) Removed all trees; clean highway curb, was green tree strip */}
@@ -938,7 +1059,7 @@ export default function Home() {
                                   key={lot.id}
                                   type="button"
                                   style={{ gridColumn: `span ${lot.units}` }}
-                                  className={`unit-tile ${lot.status} ${selectedLotId === lot.id ? "focused" : ""} ${isVacantSelected ? "vacant-picked" : ""}`}
+                                  className={`unit-tile ${lot.status} ${activeStoreLot?.id === lot.id ? "focused" : ""} ${isVacantSelected ? "vacant-picked" : ""}`}
                                   onClick={() => chooseLot(lot)}
                                 >
                                   {isVacantSelected && <span className="picked-check"><Check size={11} /></span>}
@@ -990,7 +1111,7 @@ export default function Home() {
                                   key={lot.id}
                                   type="button"
                                   style={{ gridColumn: `span ${lot.units}` }}
-                                  className={`unit-tile ${lot.status} ${selectedLotId === lot.id ? "focused" : ""} ${isVacantSelected ? "vacant-picked" : ""}`}
+                                  className={`unit-tile ${lot.status} ${activeStoreLot?.id === lot.id ? "focused" : ""} ${isVacantSelected ? "vacant-picked" : ""}`}
                                   onClick={() => chooseLot(lot)}
                                 >
                                   {isVacantSelected && <span className="picked-check"><Check size={11} /></span>}
@@ -1064,7 +1185,7 @@ export default function Home() {
                                   key={lot.id}
                                   type="button"
                                   style={{ gridColumn: `span ${lot.units}` }}
-                                  className={`unit-tile ${lot.status} ${selectedLotId === lot.id ? "focused" : ""} ${isVacantSelected ? "vacant-picked" : ""}`}
+                                  className={`unit-tile ${lot.status} ${activeStoreLot?.id === lot.id ? "focused" : ""} ${isVacantSelected ? "vacant-picked" : ""}`}
                                   onClick={() => chooseLot(lot)}
                                 >
                                   {isVacantSelected && <span className="picked-check"><Check size={11} /></span>}
@@ -1108,7 +1229,7 @@ export default function Home() {
                                   key={lot.id}
                                   type="button"
                                   style={{ gridColumn: `span ${lot.units}` }}
-                                  className={`unit-tile ${lot.status} ${selectedLotId === lot.id ? "focused" : ""} ${isVacantSelected ? "vacant-picked" : ""}`}
+                                  className={`unit-tile ${lot.status} ${activeStoreLot?.id === lot.id ? "focused" : ""} ${isVacantSelected ? "vacant-picked" : ""}`}
                                   onClick={() => chooseLot(lot)}
                                 >
                                   {isVacantSelected && <span className="picked-check"><Check size={11} /></span>}
@@ -1124,8 +1245,8 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* (2026-07-13) Interactive store inspector + multi-unit leasing bar, was vacant-only bar */}
-                {selectedVacantLots.length > 0 ? (
+                {/* (2026-07-13) Show multi-unit leasing bar when vacant units are picked */}
+                {selectedVacantLots.length > 0 && (
                   <div className="vacant-selection-bar">
                     <div className="vacant-selection-info">
                       <strong>
@@ -1144,28 +1265,6 @@ export default function Home() {
                         Inquire for Selected {selectedVacantLots.length === 1 ? "Unit" : "Units"} <ArrowRight size={15} />
                       </button>
                     </div>
-                  </div>
-                ) : (
-                  <div className="store-inspector-bar" key={selectedLot.id}>
-                    <div className="inspector-left">
-                      {selectedLot.logo ? (
-                        <div className="inspector-logo">
-                          <img src={selectedLot.logo} alt={selectedLot.brand} />
-                        </div>
-                      ) : (
-                        <div className="inspector-icon"><Store size={18} /></div>
-                      )}
-                      <div>
-                        <strong>{selectedLot.brand}</strong>
-                        <span>
-                          {selectedLot.building} · {selectedLot.floor === "Ground Floor" ? "1st Floor" : "2nd Floor"} ·{" "}
-                          {selectedLot.category} · {selectedLot.units} {selectedLot.units === 1 ? "Unit" : "Units"}
-                        </span>
-                      </div>
-                    </div>
-                    <button type="button" className="inspector-action" onClick={() => scrollTo("brands")}>
-                      View Directory <ArrowRight size={14} />
-                    </button>
                   </div>
                 )}
 
@@ -1457,6 +1556,82 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+      {/* (2026-07-13) Business detail modal with logo, branch photo, hours & Google Maps */}
+      {activeStoreLot && (() => {
+        const profile = branchProfiles[activeStoreLot.brand] ?? {
+          hours: "9:00 AM – 6:00 PM",
+          days: "Monday – Sunday",
+          description: `${activeStoreLot.brand} located at ${activeStoreLot.building}, ${activeStoreLot.floor === "Ground Floor" ? "1st Floor" : "2nd Floor"}, Bogo City Centrum.`,
+          photo: "./images/centrum-day-facade.jpg",
+          mapsQuery: `${activeStoreLot.brand} Bogo City Centrum Taytayan Bogo City Cebu`,
+        };
+        return (
+          <div className="store-modal-backdrop" role="dialog" aria-modal="true" aria-label={activeStoreLot.brand} onClick={() => setActiveStoreLot(null)}>
+            <div className="store-modal-card" onClick={event => event.stopPropagation()}>
+              <div className="store-modal-photo">
+                <img src={profile.photo} alt={`${activeStoreLot.brand} branch at Bogo City Centrum`} />
+                <button type="button" className="store-modal-close" aria-label="Close store details" onClick={() => setActiveStoreLot(null)}>
+                  <X size={18} />
+                </button>
+                <span className="store-modal-floor-tag">
+                  {activeStoreLot.building} · {activeStoreLot.floor === "Ground Floor" ? "1st Floor" : "2nd Floor"}
+                </span>
+              </div>
+              <div className="store-modal-body">
+                <div className="store-modal-head">
+                  {activeStoreLot.logo ? (
+                    <div className="store-modal-logo">
+                      <img src={activeStoreLot.logo} alt={`${activeStoreLot.brand} logo`} />
+                    </div>
+                  ) : (
+                    <div className="store-modal-logo store-modal-logo-fallback">
+                      <Store size={22} />
+                    </div>
+                  )}
+                  <div>
+                    <h3>{activeStoreLot.brand}</h3>
+                    <p>{activeStoreLot.category}</p>
+                  </div>
+                </div>
+
+                <p className="store-modal-desc">{profile.description}</p>
+
+                <div className="store-modal-meta-grid">
+                  <div className="store-meta-item">
+                    <Clock size={16} />
+                    <div>
+                      <strong>{profile.hours}</strong>
+                      <span>{profile.days}</span>
+                    </div>
+                  </div>
+                  <div className="store-meta-item">
+                    <MapPin size={16} />
+                    <div>
+                      <strong>Unit {activeStoreLot.id} ({activeStoreLot.units} {activeStoreLot.units === 1 ? "Unit" : "Units"})</strong>
+                      <span>Bogo City Centrum, Taytayan</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="store-modal-actions">
+                  <a
+                    className="accent-button store-maps-link"
+                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(profile.mapsQuery)}`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Open in Google Maps <ExternalLink size={15} />
+                  </a>
+                  <button type="button" className="store-close-secondary" onClick={() => setActiveStoreLot(null)}>
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {inquirySent && (
         <div className="toast" role="status">

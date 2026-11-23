@@ -14,9 +14,10 @@
   --navy-deep: #061830;
   --ink: #102540;
   --muted: #5a6f87;
+  /* (2026-07-13) Warm stone-white mist & border to match timber facade, was cool blue */
   --paper: #ffffff;
-  --mist: #f5f8fc;
-  --line: #dde7f2;
+  --mist: #f7f6f3;
+  --line: #e5e3de;
   --brand-bar: linear-gradient(90deg, #2d6cb5 0%, #49b0e6 50%, #58b92e 100%);
   --radius-sm: 8px;
   --radius: 14px;
@@ -287,16 +288,17 @@ input {
   object-position: right center;
 }
 
+/* (2026-07-13) Shifted dark navy hero gradient further right, was 32%/50%/68% */
 .hero-scrim {
   position: absolute;
   inset: 0;
   background: linear-gradient(
     90deg,
     rgba(3, 14, 30, 0.96) 0%,
-    rgba(5, 20, 44, 0.88) 32%,
-    rgba(6, 26, 56, 0.56) 50%,
-    rgba(6, 26, 56, 0.14) 68%,
-    rgba(6, 26, 56, 0) 82%
+    rgba(5, 20, 44, 0.9) 42%,
+    rgba(6, 26, 56, 0.62) 60%,
+    rgba(6, 26, 56, 0.2) 76%,
+    rgba(6, 26, 56, 0) 90%
   );
 }
 
@@ -337,8 +339,9 @@ input {
   text-shadow: 0 2px 18px rgba(4, 24, 58, 0.35);
 }
 
+/* (2026-07-13) Highlighted Commercial Hub in Centrum logo green, was white */
 .hero-accent {
-  color: #7ee362;
+  color: #62c943;
 }
 
 .hero-subtitle {
@@ -395,6 +398,7 @@ input {
   margin-top: -66px;
 }
 
+/* (2026-07-13) Removed top gradient stripe on 4-pillar card, was rainbow bar */
 .pillars-card {
   position: relative;
   background: var(--paper);
@@ -404,16 +408,6 @@ input {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   overflow: hidden;
-}
-
-.pillars-card::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: var(--brand-bar);
 }
 
 .pillar-item {
@@ -439,19 +433,12 @@ input {
   flex-shrink: 0;
 }
 
-.icon-blue {
-  background: #eaf2fb;
-  color: var(--logo-blue);
-}
-
-.icon-sky {
-  background: var(--logo-sky-soft);
-  color: #1686c2;
-}
-
+/* (2026-07-13) Unified 4-pillar & metric icon badges to calm Centrum blue, was 3 colors */
+.icon-blue,
+.icon-sky,
 .icon-green {
-  background: var(--logo-green-soft);
-  color: var(--logo-green-hover);
+  background: #eef3f9;
+  color: var(--logo-blue-deep);
 }
 
 .pillar-item h3 {
@@ -648,15 +635,16 @@ input {
   font-weight: 800;
 }
 
-.space-photo-meta span {
+/* (2026-07-13) Scoped subtitle span so arrow circle stays flex-centered */
+.space-photo-meta > div span {
   display: block;
   font-size: 12px;
   color: var(--muted);
 }
 
-.space-arrow-circle {
-  width: 30px;
-  height: 30px;
+.space-photo-meta .space-arrow-circle {
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   background: var(--mist);
   color: var(--logo-blue);
@@ -1216,9 +1204,10 @@ input {
   color: var(--navy);
 }
 
+/* (2026-07-13) Fixed grid child min-width:0 so map scrolls inside card on mobile */
 .map-workspace {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
   gap: 20px;
 }
 
@@ -1249,6 +1238,8 @@ input {
 }
 
 .site-map-card {
+  min-width: 0;
+  max-width: 100%;
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
   background: #f4f7fb;
@@ -1257,6 +1248,8 @@ input {
 }
 
 .street-map-scroll {
+  width: 100%;
+  max-width: 100%;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   border-radius: var(--radius);
@@ -1427,6 +1420,11 @@ input {
   cursor: pointer;
   box-shadow: 0 1px 2px rgba(15, 30, 50, 0.04);
   transition: transform 0.14s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+}
+
+/* (2026-07-13) Prevent sticky focus ring after mouse/touch click on tiles */
+.unit-tile:focus:not(:focus-visible) {
+  outline: none;
 }
 
 .unit-tile:active:not(.unit-utility) {
@@ -2310,6 +2308,205 @@ input {
   color: rgba(190, 216, 240, 0.62);
 }
 
+/* (2026-07-13) Business detail modal styles with branch photo, logo & hours */
+.store-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  background: rgba(6, 20, 42, 0.62);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: modal-fade-in 0.18s ease;
+}
+
+@keyframes modal-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.store-modal-card {
+  width: 100%;
+  max-width: 500px;
+  background: #ffffff;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 28px 70px rgba(4, 18, 38, 0.34);
+  animation: modal-scale-in 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes modal-scale-in {
+  from { opacity: 0; transform: translateY(10px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.store-modal-photo {
+  position: relative;
+  height: 210px;
+  background: var(--navy);
+  overflow: hidden;
+}
+
+.store-modal-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.store-modal-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 0;
+  background: rgba(6, 20, 42, 0.72);
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.store-modal-floor-tag {
+  position: absolute;
+  left: 14px;
+  bottom: 12px;
+  padding: 5px 11px;
+  border-radius: 8px;
+  background: rgba(6, 20, 42, 0.84);
+  color: #ffffff;
+  font-size: 11.5px;
+  font-weight: 700;
+}
+
+.store-modal-body {
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.store-modal-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.store-modal-logo {
+  width: 72px;
+  height: 48px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: #ffffff;
+  padding: 6px 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.store-modal-logo img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.store-modal-logo-fallback {
+  background: var(--mist);
+  color: var(--logo-blue);
+}
+
+.store-modal-head h3 {
+  margin: 0 0 3px;
+  font-size: 19px;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.store-modal-head p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.store-modal-desc {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.65;
+  color: #3d5166;
+}
+
+.store-modal-meta-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.store-meta-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 11px 12px;
+  border-radius: 10px;
+  background: var(--mist);
+  border: 1px solid var(--line);
+}
+
+.store-meta-item svg {
+  color: var(--logo-blue);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.store-meta-item strong {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 800;
+  color: var(--ink);
+  line-height: 1.3;
+}
+
+.store-meta-item span {
+  font-size: 11.5px;
+  color: var(--muted);
+}
+
+.store-modal-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.store-maps-link {
+  flex: 1;
+  text-decoration: none;
+  height: 42px;
+  font-size: 13.5px;
+}
+
+.store-close-secondary {
+  height: 42px;
+  padding: 0 18px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: var(--mist);
+  color: var(--ink);
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+@media (max-width: 540px) {
+  .store-modal-meta-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* Toast */
 .toast {
   position: fixed;
@@ -2401,7 +2598,53 @@ input {
   }
 }
 
+/* (2026-07-13) Mobile swipe hint hidden on desktop, shown on touch/narrow screens */
+.map-mobile-swipe-hint {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 7px 12px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  background: #e8eff7;
+  color: var(--logo-blue-deep);
+  font-size: 11.5px;
+  font-weight: 700;
+}
+
+@media (max-width: 1020px) {
+  .map-mobile-swipe-hint {
+    display: flex;
+  }
+}
+
 @media (max-width: 780px) {
+  .container {
+    padding: 0 16px;
+  }
+  .topbar-inner {
+    padding: 0 16px;
+  }
+  .hero-banner {
+    min-height: 500px;
+    padding: 64px 0 108px;
+  }
+  .hero-scrim {
+    background: linear-gradient(
+      180deg,
+      rgba(3, 14, 30, 0.88) 0%,
+      rgba(5, 20, 44, 0.8) 65%,
+      rgba(5, 20, 44, 0.72) 100%
+    );
+  }
+  .hero-cta-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .hero-cta-row button {
+    width: 100%;
+  }
   .main-nav {
     display: none;
     position: absolute;
@@ -2410,7 +2653,7 @@ input {
     right: 0;
     background: #ffffff;
     border-bottom: 1px solid var(--line);
-    padding: 16px 28px 20px;
+    padding: 16px 20px 20px;
     flex-direction: column;
     align-items: flex-start;
     gap: 14px;
@@ -2441,8 +2684,68 @@ input {
   .pillar-item:last-child {
     border-bottom: 0;
   }
-  .stalls {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+  .map-section.section-space {
+    padding: 44px 0 52px;
+  }
+  .map-selected-pill {
+    width: 100%;
+  }
+  .map-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    padding: 12px;
+  }
+  .floor-switcher {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+  .floor-switcher span {
+    display: none;
+  }
+  .floor-switcher button {
+    height: 38px;
+    padding: 0 8px;
+    font-size: 12.5px;
+  }
+  .map-legend {
+    justify-content: center;
+    gap: 12px;
+    font-size: 11.5px;
+  }
+  .site-map-card {
+    padding: 10px;
+  }
+  .street-map-board {
+    min-width: 820px;
+    grid-template-columns: 52px minmax(0, 1fr);
+  }
+  .highway-column {
+    grid-template-columns: 6px 46px;
+  }
+  .compound-column {
+    padding: 8px;
+    gap: 7px;
+  }
+  .unit-tile {
+    min-height: 60px;
+    padding: 5px 4px;
+  }
+  .store-inspector-bar,
+  .vacant-selection-bar {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 12px 14px;
+  }
+  .inspector-action,
+  .vacant-selection-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .selection-inquire-btn {
+    flex: 1;
   }
   .why-caption-card {
     position: static;
@@ -2450,7 +2753,7 @@ input {
   }
   .cta-split-left,
   .cta-split-right {
-    padding: 44px 24px;
+    padding: 44px 20px;
   }
   .map-header-row,
   .updates-header {
