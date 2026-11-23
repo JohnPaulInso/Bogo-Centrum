@@ -1,6 +1,7 @@
 // (2026-07-13) Grounded human-crafted design with real brand logos and logo carousel, was AI-styled hero/badges
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
+  ArrowLeft,
   ArrowRight,
   Asterisk,
   Building2,
@@ -8,7 +9,6 @@ import {
   Check,
   ChevronDown,
   Clock,
-  Footprints,
   Landmark,
   Mail,
   MapPin,
@@ -28,8 +28,10 @@ import {
 
 type Status = "occupied" | "available" | "reserved";
 type Floor = "Ground Floor" | "Second Floor";
+type MapFloorView = "All Floors" | Floor;
 type Building = "Building A" | "Building B";
 
+// (2026-07-13) Extended Lot model with unit span and utility flag, was fixed 1-slot lots
 type Lot = {
   id: string;
   building: Building;
@@ -37,10 +39,12 @@ type Lot = {
   brand: string;
   category: string;
   area: number;
+  units: number;
   status: Status;
   badge: string;
   tone: string;
   logo?: string;
+  isUtility?: boolean;
 };
 
 type Filter =
@@ -52,6 +56,7 @@ type Filter =
   | "Retail & Wellness"
   | "Available Slots";
 
+// (2026-07-13) Updated real tenant roster and exact 4-floor unit map, was mock 6-lot layout
 const brandLogos: Record<string, string> = {
   "7-Eleven": "./images/logos/7-eleven.png",
   "Rose Pharmacy": "./images/logos/rose-pharmacy.webp",
@@ -62,54 +67,81 @@ const brandLogos: Record<string, string> = {
   "Nuat Thai": "./images/logos/nuat-thai.png",
   AFPSLAI: "./images/logos/afpslai.png",
   "LCTC Foundation, Inc.": "./images/logos/lctc-foundation.png",
+  "Robinsons Supermarket": "./images/logos/robinsons-supermarket.webp",
 };
 
 const carouselBrands = [
   { name: "7-Eleven", logo: "./images/logos/7-eleven.png", lotId: "A-101" },
-  { name: "Rose Pharmacy", logo: "./images/logos/rose-pharmacy.webp", lotId: "A-102" },
-  { name: "MR.DIY", logo: "./images/logos/mr-diy.png", lotId: "A-103" },
-  { name: "LandBank", logo: "./images/logos/landbank.svg", lotId: "B-101" },
-  { name: "Palawan Pawnshop", logo: "./images/logos/palawan-pawnshop.png", lotId: "B-102" },
-  { name: "Sun Savings", logo: "./images/logos/sun-savings.png", lotId: "B-103" },
-  { name: "AFPSLAI", logo: "./images/logos/afpslai.png", lotId: "B-104" },
-  { name: "Nuat Thai", logo: "./images/logos/nuat-thai.png", lotId: "B-201" },
-  { name: "LCTC Foundation, Inc.", logo: "./images/logos/lctc-foundation.png", lotId: "A-201" },
+  { name: "Rose Pharmacy", logo: "./images/logos/rose-pharmacy.webp", lotId: "A-104" },
+  { name: "MR.DIY", logo: "./images/logos/mr-diy.png", lotId: "A-201" },
+  { name: "Robinsons Supermarket", logo: "./images/logos/robinsons-supermarket.webp", lotId: "B-101" },
+  { name: "LandBank", logo: "./images/logos/landbank.svg", lotId: "A-108" },
+  { name: "Palawan Pawnshop", logo: "./images/logos/palawan-pawnshop.png", lotId: "A-107" },
+  { name: "Sun Savings", logo: "./images/logos/sun-savings.png", lotId: "B-104" },
+  { name: "AFPSLAI", logo: "./images/logos/afpslai.png", lotId: "A-208" },
+  { name: "Nuat Thai", logo: "./images/logos/nuat-thai.png", lotId: "A-209" },
+  { name: "LCTC Foundation, Inc.", logo: "./images/logos/lctc-foundation.png", lotId: "A-210" },
 ];
 
 const seedLots: Lot[] = [
-  { id: "A-101", building: "Building A", floor: "Ground Floor", brand: "7-Eleven", category: "Convenience Store", area: 86, status: "occupied", badge: "7", tone: "red", logo: brandLogos["7-Eleven"] },
-  { id: "A-102", building: "Building A", floor: "Ground Floor", brand: "Rose Pharmacy", category: "Pharmacy & Health", area: 64, status: "occupied", badge: "R", tone: "rose", logo: brandLogos["Rose Pharmacy"] },
-  { id: "A-103", building: "Building A", floor: "Ground Floor", brand: "MR.DIY", category: "Home Improvement & Variety", area: 212, status: "occupied", badge: "MR", tone: "yellow", logo: brandLogos["MR.DIY"] },
-  { id: "A-104", building: "Building A", floor: "Ground Floor", brand: "Available Unit", category: "Retail / F&B", area: 52, status: "available", badge: "+", tone: "green" },
-  { id: "A-105", building: "Building A", floor: "Ground Floor", brand: "Reserved Unit", category: "Retail", area: 74, status: "reserved", badge: "R", tone: "amber" },
-  { id: "A-106", building: "Building A", floor: "Ground Floor", brand: "Available Unit", category: "Retail / Services", area: 48, status: "available", badge: "+", tone: "green" },
-  { id: "A-201", building: "Building A", floor: "Second Floor", brand: "LCTC Foundation, Inc.", category: "Community & Education", area: 84, status: "occupied", badge: "LC", tone: "blue", logo: brandLogos["LCTC Foundation, Inc."] },
-  { id: "A-202", building: "Building A", floor: "Second Floor", brand: "Available Unit", category: "Retail / Wellness", area: 60, status: "available", badge: "+", tone: "green" },
-  { id: "A-203", building: "Building A", floor: "Second Floor", brand: "Reserved Unit", category: "Office / Services", area: 55, status: "reserved", badge: "R", tone: "amber" },
-  { id: "A-204", building: "Building A", floor: "Second Floor", brand: "Available Unit", category: "Retail / Wellness", area: 78, status: "available", badge: "+", tone: "green" },
-  { id: "A-205", building: "Building A", floor: "Second Floor", brand: "Available Unit", category: "Retail / Wellness", area: 92, status: "available", badge: "+", tone: "green" },
-  { id: "A-206", building: "Building A", floor: "Second Floor", brand: "Available Unit", category: "Retail / Wellness", area: 49, status: "available", badge: "+", tone: "green" },
-  { id: "B-101", building: "Building B", floor: "Ground Floor", brand: "LandBank", category: "Banking & Financial Services", area: 118, status: "occupied", badge: "LB", tone: "blue", logo: brandLogos["LandBank"] },
-  { id: "B-102", building: "Building B", floor: "Ground Floor", brand: "Palawan Pawnshop", category: "Remittance, Pawn & Money Transfer", area: 73, status: "occupied", badge: "P", tone: "yellow", logo: brandLogos["Palawan Pawnshop"] },
-  { id: "B-103", building: "Building B", floor: "Ground Floor", brand: "Sun Savings", category: "Bank & Consumer Finance", area: 96, status: "occupied", badge: "SUN", tone: "sun", logo: brandLogos["Sun Savings"] },
-  { id: "B-104", building: "Building B", floor: "Ground Floor", brand: "AFPSLAI", category: "Financial & Savings Association", area: 68, status: "occupied", badge: "AF", tone: "teal", logo: brandLogos["AFPSLAI"] },
-  { id: "B-105", building: "Building B", floor: "Ground Floor", brand: "Reserved Unit", category: "Retail", area: 64, status: "reserved", badge: "R", tone: "amber" },
-  { id: "B-106", building: "Building B", floor: "Ground Floor", brand: "Available Unit", category: "Retail / F&B", area: 44, status: "available", badge: "+", tone: "green" },
-  { id: "B-201", building: "Building B", floor: "Second Floor", brand: "Nuat Thai", category: "Foot & Body Massage Wellness", area: 102, status: "occupied", badge: "NT", tone: "teal", logo: brandLogos["Nuat Thai"] },
-  { id: "B-202", building: "Building B", floor: "Second Floor", brand: "Available Unit", category: "Wellness / Services", area: 70, status: "available", badge: "+", tone: "green" },
-  { id: "B-203", building: "Building B", floor: "Second Floor", brand: "Available Unit", category: "Retail / Wellness", area: 76, status: "available", badge: "+", tone: "green" },
-  { id: "B-204", building: "Building B", floor: "Second Floor", brand: "Reserved Unit", category: "Office / Services", area: 61, status: "reserved", badge: "R", tone: "amber" },
-  { id: "B-205", building: "Building B", floor: "Second Floor", brand: "Available Unit", category: "Retail / Wellness", area: 84, status: "available", badge: "+", tone: "green" },
-  { id: "B-206", building: "Building B", floor: "Second Floor", brand: "Available Unit", category: "Retail / Wellness", area: 51, status: "available", badge: "+", tone: "green" },
+  // Building A — 2nd Floor (10 leasable units + 2 CR & Stairs cores = 12 bays)
+  { id: "A-201", building: "Building A", floor: "Second Floor", brand: "MR.DIY", category: "Home Improvement & Variety", area: 210, units: 3, status: "occupied", badge: "MR", tone: "yellow", logo: brandLogos["MR.DIY"] },
+  { id: "A-204", building: "Building A", floor: "Second Floor", brand: "DermaSure", category: "Dermatology & Skin Clinic", area: 65, units: 1, status: "occupied", badge: "DS", tone: "teal" },
+  { id: "CR-A2-1", building: "Building A", floor: "Second Floor", brand: "CR & Stairs", category: "Common Facility", area: 0, units: 1, status: "occupied", badge: "CR", tone: "blue", isUtility: true },
+  { id: "A-205", building: "Building A", floor: "Second Floor", brand: "BPO Company", category: "Corporate / BPO Office", area: 210, units: 3, status: "occupied", badge: "BPO", tone: "blue" },
+  { id: "A-208", building: "Building A", floor: "Second Floor", brand: "AFPSLAI", category: "Financial & Savings Association", area: 68, units: 1, status: "occupied", badge: "AF", tone: "teal", logo: brandLogos["AFPSLAI"] },
+  { id: "A-209", building: "Building A", floor: "Second Floor", brand: "Nuat Thai", category: "Foot & Body Massage Wellness", area: 72, units: 1, status: "occupied", badge: "NT", tone: "teal", logo: brandLogos["Nuat Thai"] },
+  { id: "A-210", building: "Building A", floor: "Second Floor", brand: "LCTC Foundation, Inc.", category: "Community & Education", area: 68, units: 1, status: "occupied", badge: "LC", tone: "blue", logo: brandLogos["LCTC Foundation, Inc."] },
+  { id: "CR-A2-2", building: "Building A", floor: "Second Floor", brand: "CR & Stairs", category: "Common Facility", area: 0, units: 1, status: "occupied", badge: "CR", tone: "blue", isUtility: true },
+
+  // Building A — 1st Floor / Ground Floor (10 leasable units + 2 CR & Stairs cores = 12 bays)
+  { id: "A-101", building: "Building A", floor: "Ground Floor", brand: "7-Eleven", category: "Convenience Store", area: 130, units: 2, status: "occupied", badge: "7", tone: "red", logo: brandLogos["7-Eleven"] },
+  { id: "A-103", building: "Building A", floor: "Ground Floor", brand: "Available Unit", category: "Retail / F&B", area: 65, units: 1, status: "available", badge: "+", tone: "green" },
+  { id: "A-104", building: "Building A", floor: "Ground Floor", brand: "Rose Pharmacy", category: "Pharmacy & Health", area: 65, units: 1, status: "occupied", badge: "R", tone: "rose", logo: brandLogos["Rose Pharmacy"] },
+  { id: "CR-A1-1", building: "Building A", floor: "Ground Floor", brand: "CR & Stairs", category: "Common Facility", area: 0, units: 1, status: "occupied", badge: "CR", tone: "blue", isUtility: true },
+  { id: "A-105", building: "Building A", floor: "Ground Floor", brand: "Available Unit", category: "Retail / Services", area: 65, units: 1, status: "available", badge: "+", tone: "green" },
+  { id: "A-106", building: "Building A", floor: "Ground Floor", brand: "Available Unit", category: "Retail / Services", area: 65, units: 1, status: "available", badge: "+", tone: "green" },
+  { id: "A-107", building: "Building A", floor: "Ground Floor", brand: "Palawan Pawnshop", category: "Remittance, Pawn & Money Transfer", area: 65, units: 1, status: "occupied", badge: "P", tone: "yellow", logo: brandLogos["Palawan Pawnshop"] },
+  { id: "A-108", building: "Building A", floor: "Ground Floor", brand: "LandBank", category: "Banking & Financial Services", area: 195, units: 3, status: "occupied", badge: "LB", tone: "blue", logo: brandLogos["LandBank"] },
+  { id: "CR-A1-2", building: "Building A", floor: "Ground Floor", brand: "CR & Stairs", category: "Common Facility", area: 0, units: 1, status: "occupied", badge: "CR", tone: "blue", isUtility: true },
+
+  // Building B — 1st Floor / Ground Floor (10 leasable units + 2 CR & Stairs cores = 12 bays)
+  { id: "B-101", building: "Building B", floor: "Ground Floor", brand: "Robinsons Supermarket", category: "Supermarket & Groceries", area: 210, units: 3, status: "occupied", badge: "RS", tone: "red", logo: brandLogos["Robinsons Supermarket"] },
+  { id: "B-104", building: "Building B", floor: "Ground Floor", brand: "Sun Savings", category: "Bank & Consumer Finance", area: 65, units: 1, status: "occupied", badge: "SUN", tone: "sun", logo: brandLogos["Sun Savings"] },
+  { id: "CR-B1-1", building: "Building B", floor: "Ground Floor", brand: "CR & Stairs", category: "Common Facility", area: 0, units: 1, status: "occupied", badge: "CR", tone: "blue", isUtility: true },
+  { id: "B-105", building: "Building B", floor: "Ground Floor", brand: "Available Unit", category: "Retail / Dining", area: 65, units: 1, status: "available", badge: "+", tone: "green" },
+  { id: "B-106", building: "Building B", floor: "Ground Floor", brand: "Available Unit", category: "Retail / Dining", area: 65, units: 1, status: "available", badge: "+", tone: "green" },
+  { id: "B-107", building: "Building B", floor: "Ground Floor", brand: "Available Unit", category: "Retail / Services", area: 65, units: 1, status: "available", badge: "+", tone: "green" },
+  { id: "B-108", building: "Building B", floor: "Ground Floor", brand: "Available Unit", category: "Retail / Services", area: 65, units: 1, status: "available", badge: "+", tone: "green" },
+  { id: "B-109", building: "Building B", floor: "Ground Floor", brand: "Available Unit", category: "Retail / Services", area: 65, units: 1, status: "available", badge: "+", tone: "green" },
+  { id: "B-110", building: "Building B", floor: "Ground Floor", brand: "Available Unit", category: "Retail / Services", area: 65, units: 1, status: "available", badge: "+", tone: "green" },
+  { id: "CR-B1-2", building: "Building B", floor: "Ground Floor", brand: "CR & Stairs", category: "Common Facility", area: 0, units: 1, status: "occupied", badge: "CR", tone: "blue", isUtility: true },
+
+  // Building B — 2nd Floor (10 vacant units + 2 CR & Stairs cores = 12 bays)
+  { id: "B-201", building: "Building B", floor: "Second Floor", brand: "Available Unit", category: "Office / Wellness", area: 65, units: 1, status: "available", badge: "+", tone: "green" },
+  { id: "B-202", building: "Building B", floor: "Second Floor", brand: "Available Unit", category: "Office / Wellness", area: 65, units: 1, status: "available", badge: "+", tone: "green" },
+  { id: "B-203", building: "Building B", floor: "Second Floor", brand: "Available Unit", category: "Office / Wellness", area: 65, units: 1, status: "available", badge: "+", tone: "green" },
+  { id: "B-204", building: "Building B", floor: "Second Floor", brand: "Available Unit", category: "Office / Wellness", area: 65, units: 1, status: "available", badge: "+", tone: "green" },
+  { id: "CR-B2-1", building: "Building B", floor: "Second Floor", brand: "CR & Stairs", category: "Common Facility", area: 0, units: 1, status: "occupied", badge: "CR", tone: "blue", isUtility: true },
+  { id: "B-205", building: "Building B", floor: "Second Floor", brand: "Available Unit", category: "Office / Retail", area: 65, units: 1, status: "available", badge: "+", tone: "green" },
+  { id: "B-206", building: "Building B", floor: "Second Floor", brand: "Available Unit", category: "Office / Retail", area: 65, units: 1, status: "available", badge: "+", tone: "green" },
+  { id: "B-207", building: "Building B", floor: "Second Floor", brand: "Available Unit", category: "Office / Retail", area: 65, units: 1, status: "available", badge: "+", tone: "green" },
+  { id: "B-208", building: "Building B", floor: "Second Floor", brand: "Available Unit", category: "Office / Retail", area: 65, units: 1, status: "available", badge: "+", tone: "green" },
+  { id: "B-209", building: "Building B", floor: "Second Floor", brand: "Available Unit", category: "Office / Retail", area: 65, units: 1, status: "available", badge: "+", tone: "green" },
+  { id: "B-210", building: "Building B", floor: "Second Floor", brand: "Available Unit", category: "Office / Retail", area: 65, units: 1, status: "available", badge: "+", tone: "green" },
+  { id: "CR-B2-2", building: "Building B", floor: "Second Floor", brand: "CR & Stairs", category: "Common Facility", area: 0, units: 1, status: "occupied", badge: "CR", tone: "blue", isUtility: true },
 ];
 
 const presetBrands = [
   "7-Eleven",
   "Rose Pharmacy",
+  "MR.DIY",
+  "DermaSure",
+  "BPO Company",
+  "Robinsons Supermarket",
   "Palawan Pawnshop",
   "Nuat Thai",
   "Sun Savings",
-  "MR.DIY",
   "LandBank",
   "AFPSLAI",
   "LCTC Foundation, Inc.",
@@ -118,15 +150,18 @@ const presetBrands = [
 ];
 
 const brandDetails: Record<string, { category: string; area: number; badge: string; tone: string; logo?: string }> = {
-  "7-Eleven": { category: "Convenience Store", area: 86, badge: "7", tone: "red", logo: brandLogos["7-Eleven"] },
-  "Rose Pharmacy": { category: "Pharmacy & Health", area: 64, badge: "R", tone: "rose", logo: brandLogos["Rose Pharmacy"] },
-  "Palawan Pawnshop": { category: "Remittance, Pawn & Money Transfer", area: 73, badge: "P", tone: "yellow", logo: brandLogos["Palawan Pawnshop"] },
-  "Nuat Thai": { category: "Foot & Body Massage Wellness", area: 102, badge: "NT", tone: "teal", logo: brandLogos["Nuat Thai"] },
-  "Sun Savings": { category: "Bank & Consumer Finance", area: 96, badge: "SUN", tone: "sun", logo: brandLogos["Sun Savings"] },
-  "MR.DIY": { category: "Home Improvement & Variety", area: 212, badge: "MR", tone: "yellow", logo: brandLogos["MR.DIY"] },
-  LandBank: { category: "Banking & Financial Services", area: 118, badge: "LB", tone: "blue", logo: brandLogos["LandBank"] },
+  "7-Eleven": { category: "Convenience Store", area: 130, badge: "7", tone: "red", logo: brandLogos["7-Eleven"] },
+  "Rose Pharmacy": { category: "Pharmacy & Health", area: 65, badge: "R", tone: "rose", logo: brandLogos["Rose Pharmacy"] },
+  "Palawan Pawnshop": { category: "Remittance, Pawn & Money Transfer", area: 65, badge: "P", tone: "yellow", logo: brandLogos["Palawan Pawnshop"] },
+  "Nuat Thai": { category: "Foot & Body Massage Wellness", area: 72, badge: "NT", tone: "teal", logo: brandLogos["Nuat Thai"] },
+  "Sun Savings": { category: "Bank & Consumer Finance", area: 65, badge: "SUN", tone: "sun", logo: brandLogos["Sun Savings"] },
+  "MR.DIY": { category: "Home Improvement & Variety", area: 210, badge: "MR", tone: "yellow", logo: brandLogos["MR.DIY"] },
+  LandBank: { category: "Banking & Financial Services", area: 195, badge: "LB", tone: "blue", logo: brandLogos["LandBank"] },
   AFPSLAI: { category: "Financial & Savings Association", area: 68, badge: "AF", tone: "teal", logo: brandLogos["AFPSLAI"] },
-  "LCTC Foundation, Inc.": { category: "Community & Education", area: 84, badge: "LC", tone: "blue", logo: brandLogos["LCTC Foundation, Inc."] },
+  "LCTC Foundation, Inc.": { category: "Community & Education", area: 68, badge: "LC", tone: "blue", logo: brandLogos["LCTC Foundation, Inc."] },
+  "Robinsons Supermarket": { category: "Supermarket & Groceries", area: 210, badge: "RS", tone: "red", logo: brandLogos["Robinsons Supermarket"] },
+  DermaSure: { category: "Dermatology & Skin Clinic", area: 65, badge: "DS", tone: "teal" },
+  "BPO Company": { category: "Corporate / BPO Office", area: 210, badge: "BPO", tone: "blue" },
 };
 
 const spaceCategories: { title: string; subtitle: string; tag: string; image: string; filter: Filter }[] = [
@@ -220,6 +255,19 @@ function CentrumLogo({ light = false }: { light?: boolean }) {
   );
 }
 
+// (2026-07-13) Added friendly top-down SVG tree drawing for simple readable sitemap
+function MapTreeIcon({ size = 18 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 28 28" fill="none" aria-hidden="true" className="svg-map-tree">
+      <circle cx="14" cy="14" r="11" fill="#4aa628" />
+      <circle cx="10" cy="11" r="6" fill="#63c43c" />
+      <circle cx="18" cy="12" r="5.5" fill="#58b92e" />
+      <circle cx="14" cy="18" r="5.5" fill="#3f9421" />
+      <circle cx="11.5" cy="10" r="2.5" fill="#8ee368" />
+    </svg>
+  );
+}
+
 function StatusBadge({ status }: { status: Status }) {
   return (
     <span className={`status-badge status-${status}`}>
@@ -232,7 +280,9 @@ function StatusBadge({ status }: { status: Status }) {
 export default function Home() {
   const [lots, setLots] = useState<Lot[]>(seedLots);
   const [activeFilter, setActiveFilter] = useState<Filter>("All Brands");
-  const [floor, setFloor] = useState<Floor>("Ground Floor");
+  // (2026-07-13) Added All Floors view + multi-unit vacant selection, was single floor
+  const [floor, setFloor] = useState<MapFloorView>("All Floors");
+  const [selectedVacantIds, setSelectedVacantIds] = useState<string[]>([]);
   // (2026-07-13) Hide Brand Studio from public; unlock via ?admin=1 or Ctrl+Shift+A
   const [isAdminMode, setIsAdminMode] = useState(
     () => typeof window !== "undefined" && new URLSearchParams(window.location.search).get("admin") === "1"
@@ -348,25 +398,37 @@ export default function Home() {
     return () => document.removeEventListener("mousedown", handleOutside);
   }, []);
 
+  const leasableLots = useMemo(() => lots.filter(lot => !lot.isUtility), [lots]);
+
   const directoryLots = useMemo(() => {
-    const cards = lots.filter(lot => lot.status === "occupied" || lot.status === "available");
+    const cards = leasableLots.filter(lot => lot.status === "occupied" || lot.status === "available");
     return cards
       .filter(lot => {
         if (activeFilter === "All Brands") return true;
         if (activeFilter === "Building A" || activeFilter === "Building B") return lot.building === activeFilter;
         if (activeFilter === "Available Slots") return lot.status === "available";
         if (activeFilter === "Banking & Pawn") return /bank|pawn|remittance|finance|savings/i.test(lot.category);
-        if (activeFilter === "Convenience & Pharmacy") return /convenience|pharmacy|health/i.test(lot.category);
-        return /retail|wellness|massage|improvement|community|education/i.test(lot.category);
+        if (activeFilter === "Convenience & Pharmacy") return /convenience|pharmacy|health|supermarket|dermatology/i.test(lot.category);
+        return /retail|wellness|massage|improvement|community|education|office|bpo|dining/i.test(lot.category);
       })
       .slice(0, 12);
-  }, [activeFilter, lots]);
+  }, [activeFilter, leasableLots]);
 
-  const occupiedCount = useMemo(() => lots.filter(lot => lot.status === "occupied").length, [lots]);
-  const availableCount = useMemo(() => lots.filter(lot => lot.status === "available").length, [lots]);
+  const occupiedCount = useMemo(() => leasableLots.filter(lot => lot.status === "occupied").length, [leasableLots]);
+  const availableCount = useMemo(() => leasableLots.filter(lot => lot.status === "available").length, [leasableLots]);
 
-  const floorLots = lots.filter(lot => lot.floor === floor);
-  const mapLot = (id: string) => floorLots.find(lot => lot.id === id);
+  const getWingFloorLots = (building: Building, targetFloor: Floor) =>
+    lots.filter(lot => lot.building === building && lot.floor === targetFloor);
+
+  const toggleVacantSelection = (lot: Lot) => {
+    if (lot.status !== "available") return;
+    setSelectedVacantIds(prev => (prev.includes(lot.id) ? prev.filter(id => id !== lot.id) : [...prev, lot.id]));
+  };
+
+  const selectedVacantLots = useMemo(
+    () => lots.filter(lot => selectedVacantIds.includes(lot.id)),
+    [lots, selectedVacantIds]
+  );
 
   const updateDraftFromPreset = (preset: string) => {
     if (preset === "Available") {
@@ -394,8 +456,9 @@ export default function Home() {
   };
 
   const chooseLot = (lot: Lot) => {
+    if (lot.isUtility) return;
     setSelectedLotId(lot.id);
-    setFloor(lot.floor);
+    if (lot.status === "available") toggleVacantSelection(lot);
     if (adminOpen) setDraft({ ...lot });
   };
 
@@ -744,7 +807,7 @@ export default function Home() {
             <div className="metric-cell">
               <div className="metric-icon icon-sky"><Landmark size={23} /></div>
               <div>
-                <strong>{lots.length}</strong>
+                <strong>{leasableLots.reduce((sum, item) => sum + item.units, 0)}</strong>
                 <span>Commercial Units</span>
               </div>
             </div>
@@ -797,39 +860,45 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Interactive 2D Architectural Satellite Map */}
+        {/* (2026-07-13) Compact 1-screen 2D street map with U-turn, CR/Palawan aisles & SVG trees */}
         <section id="map" className="map-section section-space">
-          <div className="container">
+          <div className="container map-wide-container">
             <div className="map-header-row">
               <div>
                 <div className="kicker-bar"><span /> PLAN YOUR PRESENCE</div>
-                <h2>Interactive 2D Architectural Site Map</h2>
+                <h2>2D Street-View Site Map</h2>
                 <p className="section-lede">
-                  {/* (2026-07-13) Removed public Brand Studio mention, was shown to visitors */}
-                  Explore Building A and Building B across the central parking plaza. Click any unit to inspect its
-                  tenant details, floor level, and commercial footprint.
+                  Simple top-down guide to Building A, Building B, and parking. Click any store to view details, or
+                  click one or more green Vacant squares to inquire for leasing.
                 </p>
               </div>
               <div className="map-selected-pill">
-                <span>Selected Unit</span>
-                <strong>{selectedLot.id} · {selectedLot.brand}</strong>
+                <span>
+                  {selectedLot.building} · {selectedLot.floor === "Ground Floor" ? "1st Floor" : "2nd Floor"}
+                </span>
+                <strong>
+                  {selectedLot.id} · {selectedLot.brand} ({selectedLot.units} {selectedLot.units === 1 ? "Unit" : "Units"})
+                </strong>
               </div>
             </div>
 
             <div className="map-toolbar">
               <div className="floor-switcher">
-                <span>Floor</span>
+                <span>View</span>
+                <button className={floor === "All Floors" ? "active" : ""} onClick={() => setFloor("All Floors")}>
+                  All Floors
+                </button>
                 <button className={floor === "Ground Floor" ? "active" : ""} onClick={() => setFloor("Ground Floor")}>
-                  Ground Floor
+                  1st Floor
                 </button>
                 <button className={floor === "Second Floor" ? "active" : ""} onClick={() => setFloor("Second Floor")}>
-                  Second Floor
+                  2nd Floor
                 </button>
               </div>
               <div className="map-legend">
-                <span><i className="legend-dot legend-available" /> Available</span>
-                <span><i className="legend-dot legend-occupied" /> Occupied</span>
-                <span><i className="legend-dot legend-reserved" /> Reserved</span>
+                <span><i className="legend-dot legend-occupied" /> Store</span>
+                <span><i className="legend-dot legend-available" /> Vacant (Click to Select)</span>
+                <span><i className="legend-dot legend-utility" /> CR &amp; Stairs</span>
               </div>
               {isAdminMode && (
                 <button className={`studio-button ${adminOpen ? "active" : ""}`} onClick={() => setAdminOpen(v => !v)}>
@@ -840,81 +909,272 @@ export default function Home() {
 
             <div className={`map-workspace ${isAdminMode && adminOpen ? "with-drawer" : ""}`}>
               <div className="site-map-card">
-                <div className="site-map-canvas">
-                  <div className="map-road map-road-top" />
-                  <div className="map-road map-road-bottom" />
-                  <div className="map-compass"><Navigation size={15} /><span>N</span></div>
-                  <div className="map-entry entry-left"><ArrowRight size={13} /> Main Entry</div>
-                  <div className="map-entry entry-right">Exit <ArrowRight size={13} /></div>
-
-                  <div className="map-building map-building-a">
-                    <div className="building-label">
-                      <strong>BUILDING A</strong>
-                      <span>{floor === "Ground Floor" ? "Ground floor · 6 lots" : "Second floor · 6 lots"}</span>
-                    </div>
-                    <div className="stalls">
-                      {Array.from({ length: 6 }).map((_, index) => {
-                        const lot = mapLot(`A-${floor === "Ground Floor" ? 101 + index : 201 + index}`)!;
-                        return (
-                          <button
-                            key={lot.id}
-                            className={`map-stall ${lot.status} ${selectedLotId === lot.id ? "selected" : ""}`}
-                            onClick={() => chooseLot(lot)}
-                          >
-                            <span className="stall-id">{lot.id}</span>
-                            <BrandMark lot={lot} />
-                            <span className="stall-area">{lot.area} sqm</span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  <div className="parking-plaza">
-                    <div className="parking-label">
-                      <span>Central Parking Plaza</span>
-                      <small>Pedestrian walkways between wings</small>
-                    </div>
-                    <div className="parking-lanes">
-                      <div className="parking-bays">{Array.from({ length: 14 }).map((_, i) => <i key={i} />)}</div>
-                      <div className="walkway">
-                        <Footprints size={14} />
-                        <span>Covered pedestrian way</span>
-                        <Footprints size={14} />
+                <div className="street-map-scroll">
+                  <div className="street-map-board">
+                    {/* Left Vertical National Highway (Taytayan) */}
+                    <div className="highway-column" aria-label="Taytayan National Highway">
+                      <div className="highway-trees">
+                        {Array.from({ length: 6 }).map((_, i) => (
+                          <MapTreeIcon key={i} size={18} />
+                        ))}
                       </div>
-                      <div className="parking-bays reverse">{Array.from({ length: 14 }).map((_, i) => <i key={i} />)}</div>
+                      <div className="highway-asphalt">
+                        <span className="highway-name">TAYTAYAN HIGHWAY</span>
+                        <div className="highway-car car-down" aria-hidden="true" />
+                        <div className="highway-car car-up" aria-hidden="true" />
+                      </div>
                     </div>
-                    <div className="green-islands"><i /><i /><i /></div>
-                  </div>
 
-                  <div className="map-building map-building-b">
-                    <div className="building-label">
-                      <strong>BUILDING B</strong>
-                      <span>{floor === "Ground Floor" ? "Ground floor · 6 lots" : "Second floor · 6 lots"}</span>
-                    </div>
-                    <div className="stalls">
-                      {Array.from({ length: 6 }).map((_, index) => {
-                        const lot = mapLot(`B-${floor === "Ground Floor" ? 101 + index : 201 + index}`)!;
-                        return (
-                          <button
-                            key={lot.id}
-                            className={`map-stall ${lot.status} ${selectedLotId === lot.id ? "selected" : ""}`}
-                            onClick={() => chooseLot(lot)}
-                          >
-                            <span className="stall-id">{lot.id}</span>
-                            <BrandMark lot={lot} />
-                            <span className="stall-area">{lot.area} sqm</span>
-                          </button>
-                        );
-                      })}
+                    {/* Right Side: Building A (2F + 1F), Central Parking with Plant Boxes & U-Turn, Building B (1F + 2F) */}
+                    <div className="compound-column">
+                      {(floor === "All Floors" || floor === "Second Floor") && (
+                        <div className="wing-floor-block wing-a-2f">
+                          <div className="wing-floor-head">
+                            <strong>BUILDING A · 2ND FLOOR</strong>
+                            <span>Upstairs Stores &amp; Offices</span>
+                          </div>
+                          <div className="unit-grid-12">
+                            {getWingFloorLots("Building A", "Second Floor").map(lot => {
+                              const isVacantSelected = selectedVacantIds.includes(lot.id);
+                              if (lot.isUtility) {
+                                return (
+                                  <div key={lot.id} className="unit-tile unit-utility" style={{ gridColumn: `span ${lot.units}` }}>
+                                    <span>CR &amp;</span>
+                                    <small>Stairs</small>
+                                  </div>
+                                );
+                              }
+                              return (
+                                <button
+                                  key={lot.id}
+                                  type="button"
+                                  style={{ gridColumn: `span ${lot.units}` }}
+                                  className={`unit-tile ${lot.status} ${selectedLotId === lot.id ? "focused" : ""} ${isVacantSelected ? "vacant-picked" : ""}`}
+                                  onClick={() => chooseLot(lot)}
+                                >
+                                  {isVacantSelected && <span className="picked-check"><Check size={11} /></span>}
+                                  {lot.logo ? (
+                                    <img className="unit-logo-img" src={lot.logo} alt={lot.brand} />
+                                  ) : (
+                                    <strong className="unit-name-text">{lot.status === "available" ? "Vacant" : lot.brand}</strong>
+                                  )}
+                                  <span className="unit-sub">{lot.status === "available" ? lot.id : lot.brand}</span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+
+                      {(floor === "All Floors" || floor === "Ground Floor") && (
+                        <div className="wing-floor-block wing-a-1f">
+                          <div className="wing-floor-head">
+                            <strong>BUILDING A · 1ST FLOOR (GROUND)</strong>
+                            <span>Exit Side · Facing Parking</span>
+                          </div>
+                          <div className="unit-grid-12">
+                            {getWingFloorLots("Building A", "Ground Floor").map(lot => {
+                              const isVacantSelected = selectedVacantIds.includes(lot.id);
+                              if (lot.isUtility) {
+                                return (
+                                  <div key={lot.id} className="unit-tile unit-utility" style={{ gridColumn: `span ${lot.units}` }}>
+                                    <span>CR &amp;</span>
+                                    <small>Stairs</small>
+                                  </div>
+                                );
+                              }
+                              return (
+                                <button
+                                  key={lot.id}
+                                  type="button"
+                                  style={{ gridColumn: `span ${lot.units}` }}
+                                  className={`unit-tile ${lot.status} ${selectedLotId === lot.id ? "focused" : ""} ${isVacantSelected ? "vacant-picked" : ""}`}
+                                  onClick={() => chooseLot(lot)}
+                                >
+                                  {isVacantSelected && <span className="picked-check"><Check size={11} /></span>}
+                                  {lot.logo ? (
+                                    <img className="unit-logo-img" src={lot.logo} alt={lot.brand} />
+                                  ) : (
+                                    <strong className="unit-name-text">{lot.status === "available" ? "Vacant" : lot.brand}</strong>
+                                  )}
+                                  <span className="unit-sub">{lot.status === "available" ? lot.id : lot.brand}</span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Central Parking Plaza with Plant Boxes, Aisles at 1st CR & After Palawan, and U-Turn */}
+                      <div className="street-parking-corridor">
+                        <div className="gate-column">
+                          <div className="gate-pill gate-exit">
+                            <ArrowLeft size={13} /> EXIT
+                          </div>
+                          <div className="gate-pill gate-entrance">
+                            ENTER <ArrowRight size={13} />
+                          </div>
+                        </div>
+
+                        <div className="parking-asphalt-body">
+                          <div className="parking-lane-row">
+                            <span className="lane-arrow"><ArrowLeft size={12} /> Exit Lane</span>
+                            <div className="parking-stripes-row">
+                              {Array.from({ length: 16 }).map((_, i) => <i key={i} />)}
+                            </div>
+                          </div>
+
+                          {/* 12-col aligned Plant Boxes + Open Aisles (Col 5 = 1st CR, Col 9 = After Palawan) */}
+                          <div className="median-grid-12">
+                            <div className="plant-box" style={{ gridColumn: "span 4" }}>
+                              <MapTreeIcon size={17} />
+                              <span>Plant Box</span>
+                              <MapTreeIcon size={17} />
+                            </div>
+                            <div className="aisle-gap" style={{ gridColumn: "span 1" }}>
+                              <span>Aisle</span>
+                            </div>
+                            <div className="plant-box" style={{ gridColumn: "span 3" }}>
+                              <MapTreeIcon size={17} />
+                              <span>Plant Box</span>
+                              <MapTreeIcon size={17} />
+                            </div>
+                            <div className="aisle-gap" style={{ gridColumn: "span 1" }}>
+                              <span>Aisle</span>
+                            </div>
+                            <div className="plant-box" style={{ gridColumn: "span 3" }}>
+                              <MapTreeIcon size={17} />
+                              <span>Plant Box</span>
+                              <MapTreeIcon size={17} />
+                            </div>
+                          </div>
+
+                          <div className="parking-lane-row">
+                            <span className="lane-arrow">Enter Lane <ArrowRight size={12} /></span>
+                            <div className="parking-stripes-row">
+                              {Array.from({ length: 16 }).map((_, i) => <i key={i} />)}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* U-Turn Loop at the Back End of Parking */}
+                        <div className="uturn-zone" aria-label="Parking U-Turn area">
+                          <svg width="32" height="44" viewBox="0 0 32 44" fill="none" aria-hidden="true">
+                            <path
+                              d="M6 34 H18 C24 34 27 29 27 22 C27 15 24 10 18 10 H8"
+                              stroke="#0a2548"
+                              strokeWidth="3"
+                              strokeLinecap="round"
+                            />
+                            <path d="M12 5 L6 10 L12 15" stroke="#0a2548" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                          <span>U-TURN</span>
+                        </div>
+                      </div>
+
+                      {(floor === "All Floors" || floor === "Ground Floor") && (
+                        <div className="wing-floor-block wing-b-1f">
+                          <div className="wing-floor-head">
+                            <strong>BUILDING B · 1ST FLOOR (GROUND)</strong>
+                            <span>Main Entrance Side · Facing Parking</span>
+                          </div>
+                          <div className="unit-grid-12">
+                            {getWingFloorLots("Building B", "Ground Floor").map(lot => {
+                              const isVacantSelected = selectedVacantIds.includes(lot.id);
+                              if (lot.isUtility) {
+                                return (
+                                  <div key={lot.id} className="unit-tile unit-utility" style={{ gridColumn: `span ${lot.units}` }}>
+                                    <span>CR &amp;</span>
+                                    <small>Stairs</small>
+                                  </div>
+                                );
+                              }
+                              return (
+                                <button
+                                  key={lot.id}
+                                  type="button"
+                                  style={{ gridColumn: `span ${lot.units}` }}
+                                  className={`unit-tile ${lot.status} ${selectedLotId === lot.id ? "focused" : ""} ${isVacantSelected ? "vacant-picked" : ""}`}
+                                  onClick={() => chooseLot(lot)}
+                                >
+                                  {isVacantSelected && <span className="picked-check"><Check size={11} /></span>}
+                                  {lot.logo ? (
+                                    <img className="unit-logo-img" src={lot.logo} alt={lot.brand} />
+                                  ) : (
+                                    <strong className="unit-name-text">{lot.status === "available" ? "Vacant" : lot.brand}</strong>
+                                  )}
+                                  <span className="unit-sub">{lot.status === "available" ? lot.id : lot.brand}</span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+
+                      {(floor === "All Floors" || floor === "Second Floor") && (
+                        <div className="wing-floor-block wing-b-2f">
+                          <div className="wing-floor-head">
+                            <strong>BUILDING B · 2ND FLOOR</strong>
+                            <span>All 10 Units Vacant · Click 1 or Multiple Units to Lease</span>
+                          </div>
+                          <div className="unit-grid-12">
+                            {getWingFloorLots("Building B", "Second Floor").map(lot => {
+                              const isVacantSelected = selectedVacantIds.includes(lot.id);
+                              if (lot.isUtility) {
+                                return (
+                                  <div key={lot.id} className="unit-tile unit-utility" style={{ gridColumn: `span ${lot.units}` }}>
+                                    <span>CR &amp;</span>
+                                    <small>Stairs</small>
+                                  </div>
+                                );
+                              }
+                              return (
+                                <button
+                                  key={lot.id}
+                                  type="button"
+                                  style={{ gridColumn: `span ${lot.units}` }}
+                                  className={`unit-tile ${lot.status} ${selectedLotId === lot.id ? "focused" : ""} ${isVacantSelected ? "vacant-picked" : ""}`}
+                                  onClick={() => chooseLot(lot)}
+                                >
+                                  {isVacantSelected && <span className="picked-check"><Check size={11} /></span>}
+                                  <strong className="unit-name-text">Vacant</strong>
+                                  <span className="unit-sub">{lot.id}</span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
-
-                  <div className="map-scale"><span /> 25m <span /> 50m</div>
                 </div>
+
+                {/* Prospective Tenant Multi-Unit Selection Bar */}
+                {selectedVacantLots.length > 0 && (
+                  <div className="vacant-selection-bar">
+                    <div className="vacant-selection-info">
+                      <strong>
+                        {selectedVacantLots.length} Vacant {selectedVacantLots.length === 1 ? "Unit" : "Units"} Selected
+                      </strong>
+                      <span>
+                        {selectedVacantLots.map(l => l.id).join(" + ")} · Est.{" "}
+                        {selectedVacantLots.reduce((sum, l) => sum + l.area, 0)} sqm total
+                      </span>
+                    </div>
+                    <div className="vacant-selection-actions">
+                      <button type="button" className="clear-selection-btn" onClick={() => setSelectedVacantIds([])}>
+                        Clear
+                      </button>
+                      <button type="button" className="accent-button selection-inquire-btn" onClick={inquire}>
+                        Inquire for Selected {selectedVacantLots.length === 1 ? "Unit" : "Units"} <ArrowRight size={15} />
+                      </button>
+                    </div>
+                  </div>
+                )}
+
                 <div className="map-footnote">
-                  <span><Asterisk size={13} /> Lots are illustrative for leasing planning.</span>
-                  <span>Click any unit on the floor plan to view its details.</span>
+                  <span><Asterisk size={13} /> Click any green Vacant square to select 1, 2, or more units to lease together.</span>
+                  <span>Swipe left or right on mobile to view the full wing layout.</span>
                 </div>
               </div>
 
