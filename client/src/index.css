@@ -205,17 +205,19 @@ input {
   display: block;
 }
 
+/* (2026-07-13) Prevented nav link wrapping on tablet, was 26px gap / 14px font */
 .main-nav {
   display: flex;
   align-items: center;
-  gap: 26px;
+  gap: 20px;
 }
 
 .main-nav a {
   text-decoration: none;
   color: var(--ink);
-  font-size: 14px;
+  font-size: 13.5px;
   font-weight: 600;
+  white-space: nowrap;
   transition: color 0.15s ease;
 }
 
@@ -245,10 +247,12 @@ input {
   background: var(--logo-sky-soft);
 }
 
+/* (2026-07-13) Single-line header CTA button, was wrapping on tablet */
 .top-cta {
-  height: 40px;
+  height: 38px;
   padding: 0 16px;
   font-size: 13px;
+  white-space: nowrap;
 }
 
 .menu-button {
@@ -2198,33 +2202,34 @@ input {
   transition: transform 0.3s ease;
 }
 
+/* (2026-07-13) Reduced Latest Updates card typography sizes, was 16px/12.5px */
 .update-body {
-  padding: 20px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 .update-tag {
   align-self: flex-start;
-  padding: 4px 10px;
+  padding: 3px 9px;
   border-radius: 6px;
   background: var(--logo-sky-soft);
   color: var(--logo-blue-deep);
-  font-size: 11.5px;
+  font-size: 10.5px;
   font-weight: 800;
 }
 
 .update-body h3 {
   margin: 0;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 800;
   line-height: 1.38;
   color: var(--ink);
 }
 
 .update-body time {
-  font-size: 12.5px;
+  font-size: 11.5px;
   color: var(--muted);
   font-weight: 600;
 }

@@ -606,8 +606,9 @@ export default function Home() {
                 <Pencil size={14} /> Brand Studio
               </button>
             )}
+            {/* (2026-07-13) Shortened header CTA label to Inquire, was Inquire to Lease */}
             <button className="accent-button top-cta" onClick={inquire}>
-              Inquire to Lease <ArrowRight size={15} />
+              Inquire <ArrowRight size={15} />
             </button>
             <button className="menu-button" aria-label="Toggle navigation" onClick={() => setMenuOpen(value => !value)}>
               {menuOpen ? <X size={20} /> : <Menu size={20} />}
