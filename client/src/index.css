@@ -185,54 +185,18 @@ input {
   text-decoration: none;
 }
 
+/* (2026-07-13) Styled horizontal LOGO_HEADER.png image, was boxed icon + text */
 .centrum-logo {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
 }
 
-.centrum-logo-frame {
-  width: 44px;
+.centrum-header-logo-img {
   height: 44px;
-  border-radius: 8px;
-  background: #ffffff;
-  padding: 2px;
-  overflow: hidden;
-  flex-shrink: 0;
-}
-
-.centrum-logo-frame img {
-  width: 100%;
-  height: 100%;
+  width: auto;
+  max-width: 210px;
   object-fit: contain;
-}
-
-.logo-wordmark {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.06;
-}
-
-.logo-wordmark strong {
-  font-size: 13.5px;
-  font-weight: 800;
-  letter-spacing: 0.05em;
-  color: var(--logo-blue-deep);
-}
-
-.logo-wordmark span {
-  font-size: 10.5px;
-  font-weight: 800;
-  letter-spacing: 0.2em;
-  color: var(--logo-green);
-}
-
-.centrum-logo-light .logo-wordmark strong {
-  color: #ffffff;
-}
-
-.centrum-logo-light .logo-wordmark span {
-  color: #84dc5d;
+  display: block;
 }
 
 .main-nav {

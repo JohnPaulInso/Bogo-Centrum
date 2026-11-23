@@ -211,16 +211,11 @@ function BrandMark({ lot, large = false }: { lot: Lot; large?: boolean }) {
   );
 }
 
+// (2026-07-13) Use official LOGO_HEADER.png directly, was square jpg + HTML text
 function CentrumLogo({ light = false }: { light?: boolean }) {
   return (
     <div className={`centrum-logo ${light ? "centrum-logo-light" : ""}`}>
-      <div className="centrum-logo-frame">
-        <img src="./images/centrum-logo.jpg" alt="Bogo City Centrum Logo" />
-      </div>
-      <div className="logo-wordmark">
-        <strong>BOGO CITY</strong>
-        <span>CENTRUM</span>
-      </div>
+      <img className="centrum-header-logo-img" src="./images/LOGO_HEADER.png" alt="Bogo City Centrum" />
     </div>
   );
 }
