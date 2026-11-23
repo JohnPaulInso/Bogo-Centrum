@@ -391,19 +391,27 @@ export default function Home() {
   const [activeStoreLot, setActiveStoreLot] = useState<Lot | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
 
+  // (2026-07-13) Added context-aware inquiry modal state submitting to info@bainestdigital.com
+  const [inquiryModal, setInquiryModal] = useState<{ subject: string; unitLabel: string; message: string } | null>(null);
+  const [inquiryForm, setInquiryForm] = useState({ name: "", business: "", email: "", phone: "", message: "" });
+  const [inquirySubmitting, setInquirySubmitting] = useState(false);
+
   useEffect(() => {
-    if (!activeStoreLot) return;
+    if (!activeStoreLot && !inquiryModal) return;
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     const onEsc = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setActiveStoreLot(null);
+      if (event.key === "Escape") {
+        setActiveStoreLot(null);
+        setInquiryModal(null);
+      }
     };
     window.addEventListener("keydown", onEsc);
     return () => {
       document.body.style.overflow = prevOverflow;
       window.removeEventListener("keydown", onEsc);
     };
-  }, [activeStoreLot]);
+  }, [activeStoreLot, inquiryModal]);
   const [lotDropdownOpen, setLotDropdownOpen] = useState(false);
   const [draft, setDraft] = useState<Lot>(seedLots[0]);
   const [inquirySent, setInquirySent] = useState(false);
@@ -571,9 +579,55 @@ export default function Home() {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const inquire = () => {
-    setInquirySent(true);
-    window.setTimeout(() => setInquirySent(false), 3600);
+  // (2026-07-13) Open context-aware inquiry modal with pre-filled template, was toast only
+  const openInquiry = (subject: string, unitLabel: string, message: string) => {
+    setInquiryModal({ subject, unitLabel, message });
+    setInquiryForm(prev => ({ ...prev, message }));
+  };
+
+  const handleInquirySubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!inquiryModal || inquirySubmitting) return;
+    setInquirySubmitting(true);
+    const payload = {
+      _subject: `Bogo City Centrum — ${inquiryModal.subject}`,
+      _template: "table",
+      _captcha: "false",
+      Inquiry_Type: inquiryModal.subject,
+      Selected_Unit: inquiryModal.unitLabel,
+      Name: inquiryForm.name,
+      Business_Name: inquiryForm.business || "N/A",
+      Email: inquiryForm.email,
+      Phone: inquiryForm.phone,
+      Message: inquiryForm.message,
+    };
+    try {
+      const response = await fetch("https://formsubmit.co/ajax/info@bainestdigital.com", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!response.ok) throw new Error("FormSubmit request failed");
+      setInquiryModal(null);
+      setInquiryForm({ name: "", business: "", email: "", phone: "", message: "" });
+      setInquirySent(true);
+      window.setTimeout(() => setInquirySent(false), 4500);
+    } catch {
+      const mailtoBody = [
+        `Inquiry: ${inquiryModal.subject}`,
+        `Selected Space: ${inquiryModal.unitLabel}`,
+        `Name: ${inquiryForm.name}`,
+        `Business: ${inquiryForm.business || "N/A"}`,
+        `Email: ${inquiryForm.email}`,
+        `Phone: ${inquiryForm.phone}`,
+        "",
+        inquiryForm.message,
+      ].join("\n");
+      window.location.href = `mailto:info@bainestdigital.com?subject=${encodeURIComponent(`Bogo City Centrum — ${inquiryModal.subject}`)}&body=${encodeURIComponent(mailtoBody)}`;
+      setInquiryModal(null);
+    } finally {
+      setInquirySubmitting(false);
+    }
   };
 
   return (
@@ -607,7 +661,16 @@ export default function Home() {
               </button>
             )}
             {/* (2026-07-13) Shortened header CTA label to Inquire, was Inquire to Lease */}
-            <button className="accent-button top-cta" onClick={inquire}>
+            <button
+              className="accent-button top-cta"
+              onClick={() =>
+                openInquiry(
+                  "General Leasing Inquiry",
+                  "General Commercial Space",
+                  "Hello Bogo City Centrum Leasing Team,\n\nI would like to inquire about available commercial spaces for lease at Bogo City Centrum in Taytayan, Bogo City. Please share available units, rates, and leasing requirements."
+                )
+              }
+            >
               Inquire <ArrowRight size={15} />
             </button>
             <button className="menu-button" aria-label="Toggle navigation" onClick={() => setMenuOpen(value => !value)}>
@@ -874,7 +937,11 @@ export default function Home() {
                       className="text-action green-text"
                       onClick={event => {
                         event.stopPropagation();
-                        inquire();
+                        openInquiry(
+                          `Unit ${lot.id} Leasing Inquiry`,
+                          `${lot.id} · ${lot.building} · ${lot.floor === "Ground Floor" ? "1st Floor" : "2nd Floor"} (${lot.area} sqm)`,
+                          `Hello Bogo City Centrum Leasing Team,\n\nI am interested in leasing Unit ${lot.id} (${lot.building}, ${lot.floor === "Ground Floor" ? "1st Floor" : "2nd Floor"}, approx. ${lot.area} sqm).\n\nPlease send me the monthly lease rate, terms, and site visit availability.`
+                        );
                       }}
                     >
                       Inquire For This Space <ArrowRight size={15} />
@@ -954,7 +1021,16 @@ export default function Home() {
                   </li>
                 ))}
               </ul>
-              <button className="accent-button" onClick={inquire}>
+              <button
+                className="accent-button"
+                onClick={() =>
+                  openInquiry(
+                    "Schedule a Site Visit",
+                    "Taytayan Site Tour",
+                    "Hello Bogo City Centrum Team,\n\nI would like to schedule a site visit at Bogo City Centrum in Taytayan, Bogo City to inspect available commercial units and parking access.\n\nPreferred date/time:"
+                  )
+                }
+              >
                 Schedule a Site Visit <ArrowRight size={16} />
               </button>
             </div>
@@ -1262,7 +1338,19 @@ export default function Home() {
                       <button type="button" className="clear-selection-btn" onClick={() => setSelectedVacantIds([])}>
                         Clear
                       </button>
-                      <button type="button" className="accent-button selection-inquire-btn" onClick={inquire}>
+                      <button
+                        type="button"
+                        className="accent-button selection-inquire-btn"
+                        onClick={() => {
+                          const ids = selectedVacantLots.map(l => l.id).join(", ");
+                          const totalSqm = selectedVacantLots.reduce((sum, l) => sum + l.area, 0);
+                          openInquiry(
+                            `Multi-Unit Leasing Inquiry (${ids})`,
+                            `${selectedVacantLots.length} ${selectedVacantLots.length === 1 ? "Unit" : "Units"}: ${ids} (Est. ${totalSqm} sqm)`,
+                            `Hello Bogo City Centrum Leasing Team,\n\nI selected the following vacant unit(s) on the 2D site map:\n• Units: ${ids}\n• Total: ${selectedVacantLots.length} ${selectedVacantLots.length === 1 ? "unit" : "units"} (approx. ${totalSqm} sqm)\n\nPlease share availability, combined leasing rates, and next steps.`
+                          );
+                        }}
+                      >
                         Inquire for Selected {selectedVacantLots.length === 1 ? "Unit" : "Units"} <ArrowRight size={15} />
                       </button>
                     </div>
@@ -1443,26 +1531,55 @@ export default function Home() {
                   Have a commercial space in mind? Connect with our leasing desk for floor plans, unit availability, and
                   private site tours.
                 </p>
-                <button className="accent-button" onClick={inquire}>
+                <button
+                  className="accent-button"
+                  onClick={() =>
+                    openInquiry(
+                      "Request Leasing Kit",
+                      "Leasing Kit & Floor Plans",
+                      "Hello Bogo City Centrum Leasing Team,\n\nPlease send me your official Leasing Kit, floor plans, and current list of open commercial units at Bogo City Centrum."
+                    )
+                  }
+                >
                   Request Leasing Kit <ArrowRight size={16} />
                 </button>
               </div>
             </div>
             <div className="cta-split-right">
-              <div className="contact-detail-item">
+              <button
+                type="button"
+                className="contact-detail-item contact-detail-btn"
+                onClick={() =>
+                  openInquiry(
+                    "Callback / Phone Inquiry",
+                    "Leasing Desk Contact",
+                    "Hello Bogo City Centrum Team,\n\nPlease give me a call regarding commercial leasing opportunities at Bogo City Centrum."
+                  )
+                }
+              >
                 <div className="contact-icon"><Phone size={18} /></div>
                 <div>
                   <strong>+63 32 255 0880</strong>
                   <span>Mon – Sat, 9:00 AM – 6:00 PM</span>
                 </div>
-              </div>
-              <div className="contact-detail-item">
+              </button>
+              <button
+                type="button"
+                className="contact-detail-item contact-detail-btn"
+                onClick={() =>
+                  openInquiry(
+                    "Email Contact Inquiry",
+                    "Direct Message to info@bainestdigital.com",
+                    "Hello Bogo City Centrum Team,\n\nI have a question regarding leasing and business spaces at Bogo City Centrum."
+                  )
+                }
+              >
                 <div className="contact-icon"><Mail size={18} /></div>
                 <div>
-                  <strong>leasing@bogocitycentrum.ph</strong>
-                  <span>We respond within 24 business hours</span>
+                  <strong>info@bainestdigital.com</strong>
+                  <span>Click to send us a message directly</span>
                 </div>
-              </div>
+              </button>
               <div className="contact-detail-item">
                 <div className="contact-icon"><MapPin size={18} /></div>
                 <div>
@@ -1532,8 +1649,32 @@ export default function Home() {
           </div>
           <div>
             <h4>Contact Us</h4>
-            <p className="footer-contact-line"><Phone size={14} /> +63 32 255 0880</p>
-            <p className="footer-contact-line"><Mail size={14} /> leasing@bogocitycentrum.ph</p>
+            <button
+              type="button"
+              className="footer-contact-btn"
+              onClick={() =>
+                openInquiry(
+                  "Contact Inquiry",
+                  "General Contact",
+                  "Hello Bogo City Centrum Team,\n\nI would like to get in touch regarding Bogo City Centrum."
+                )
+              }
+            >
+              <Phone size={14} /> +63 32 255 0880
+            </button>
+            <button
+              type="button"
+              className="footer-contact-btn"
+              onClick={() =>
+                openInquiry(
+                  "Email Inquiry",
+                  "Direct Message to info@bainestdigital.com",
+                  "Hello Bogo City Centrum Team,\n\nI would like to inquire about commercial leasing at Bogo City Centrum."
+                )
+              }
+            >
+              <Mail size={14} /> info@bainestdigital.com
+            </button>
             <p className="footer-contact-line"><MapPin size={14} /> Taytayan, Bogo City, Cebu</p>
             {/* (2026-07-13) Hide footer Brand Studio button from public, was visible */}
             {isAdminMode && (
@@ -1634,9 +1775,108 @@ export default function Home() {
         );
       })()}
 
+      {/* (2026-07-13) Context-aware Contact & Leasing Inquiry Modal submitting to info@bainestdigital.com */}
+      {inquiryModal && (
+        <div
+          className="store-modal-backdrop"
+          role="dialog"
+          aria-modal="true"
+          aria-label={inquiryModal.subject}
+          onClick={() => setInquiryModal(null)}
+        >
+          <div className="inquiry-modal-card" onClick={event => event.stopPropagation()}>
+            <div className="inquiry-modal-head">
+              <div>
+                <span className="inquiry-modal-eyebrow">BOGO CITY CENTRUM LEASING</span>
+                <h3>{inquiryModal.subject}</h3>
+              </div>
+              <button
+                type="button"
+                className="inquiry-modal-close"
+                aria-label="Close contact form"
+                onClick={() => setInquiryModal(null)}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="inquiry-unit-pill">
+              <MapPin size={14} />
+              <span>{inquiryModal.unitLabel}</span>
+            </div>
+
+            <form className="inquiry-form" onSubmit={handleInquirySubmit}>
+              <div className="inquiry-form-grid">
+                <label className="inquiry-field">
+                  <span>Full Name *</span>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Juan Dela Cruz"
+                    value={inquiryForm.name}
+                    onChange={e => setInquiryForm({ ...inquiryForm, name: e.target.value })}
+                  />
+                </label>
+                <label className="inquiry-field">
+                  <span>Business / Brand Name</span>
+                  <input
+                    type="text"
+                    placeholder="Optional"
+                    value={inquiryForm.business}
+                    onChange={e => setInquiryForm({ ...inquiryForm, business: e.target.value })}
+                  />
+                </label>
+                <label className="inquiry-field">
+                  <span>Email Address *</span>
+                  <input
+                    type="email"
+                    required
+                    placeholder="you@company.com"
+                    value={inquiryForm.email}
+                    onChange={e => setInquiryForm({ ...inquiryForm, email: e.target.value })}
+                  />
+                </label>
+                <label className="inquiry-field">
+                  <span>Phone / Mobile *</span>
+                  <input
+                    type="tel"
+                    required
+                    placeholder="+63 9XX XXX XXXX"
+                    value={inquiryForm.phone}
+                    onChange={e => setInquiryForm({ ...inquiryForm, phone: e.target.value })}
+                  />
+                </label>
+              </div>
+
+              <label className="inquiry-field">
+                <span>Inquiry Message *</span>
+                <textarea
+                  rows={5}
+                  required
+                  value={inquiryForm.message}
+                  onChange={e => setInquiryForm({ ...inquiryForm, message: e.target.value })}
+                />
+              </label>
+
+              <div className="inquiry-form-footer">
+                <span className="inquiry-recipient-note">Sends directly to info@bainestdigital.com</span>
+                <div className="inquiry-form-actions">
+                  <button type="button" className="store-close-secondary" onClick={() => setInquiryModal(null)}>
+                    Cancel
+                  </button>
+                  <button type="submit" className="accent-button inquiry-submit-btn" disabled={inquirySubmitting}>
+                    {inquirySubmitting ? "Sending..." : "Send Inquiry"} <Send size={15} />
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {inquirySent && (
         <div className="toast" role="status">
-          <Check size={16} /> Thanks — our leasing team will be in touch shortly.
+          <Check size={16} /> Inquiry sent to info@bainestdigital.com — our team will reply shortly.
         </div>
       )}
     </div>

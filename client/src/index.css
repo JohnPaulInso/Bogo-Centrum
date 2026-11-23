@@ -2512,6 +2512,206 @@ input {
   }
 }
 
+/* (2026-07-13) Contact & Leasing Inquiry modal + clickable contact buttons */
+.contact-detail-btn {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  padding: 8px 10px;
+  border-radius: 10px;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.16s ease;
+}
+
+.footer-contact-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 10px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: rgba(226, 240, 255, 0.84);
+  font-size: 13.5px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.footer-contact-btn svg {
+  color: var(--logo-sky);
+}
+
+.inquiry-modal-card {
+  width: 100%;
+  max-width: 560px;
+  max-height: 92vh;
+  overflow-y: auto;
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 24px;
+  box-shadow: 0 28px 70px rgba(4, 18, 38, 0.34);
+  animation: modal-scale-in 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.inquiry-modal-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.inquiry-modal-eyebrow {
+  display: block;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  color: var(--logo-blue);
+  margin-bottom: 4px;
+}
+
+.inquiry-modal-head h3 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.inquiry-modal-close {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--mist);
+  color: var(--ink);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.inquiry-unit-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 12px;
+  border-radius: 8px;
+  background: var(--logo-green-soft);
+  border: 1px solid #bce3b0;
+  color: var(--logo-green-hover);
+  font-size: 12.5px;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.inquiry-form {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+}
+
+.inquiry-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.inquiry-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.inquiry-field span {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.inquiry-field input,
+.inquiry-field textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--mist);
+  color: var(--ink);
+  font-size: 13.5px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.inquiry-field input:focus,
+.inquiry-field textarea:focus {
+  border-color: var(--logo-blue);
+  background: #ffffff;
+}
+
+.inquiry-field textarea {
+  resize: vertical;
+  min-height: 110px;
+  line-height: 1.55;
+}
+
+.inquiry-form-footer {
+  margin-top: 4px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.inquiry-recipient-note {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.inquiry-form-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.inquiry-submit-btn {
+  height: 42px;
+  padding: 0 20px;
+  font-size: 13.5px;
+}
+
+.inquiry-submit-btn:disabled {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+@media (hover: hover) {
+  .contact-detail-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+  }
+  .footer-contact-btn:hover {
+    color: #84dc5d;
+  }
+}
+
+@media (max-width: 540px) {
+  .inquiry-form-grid {
+    grid-template-columns: 1fr;
+  }
+  .inquiry-modal-card {
+    padding: 18px;
+  }
+  .inquiry-form-actions {
+    width: 100%;
+  }
+  .inquiry-submit-btn {
+    flex: 1;
+  }
+}
+
 /* Toast */
 .toast {
   position: fixed;
