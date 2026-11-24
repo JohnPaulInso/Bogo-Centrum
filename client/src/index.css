@@ -1400,11 +1400,11 @@ input {
   font-weight: 600;
 }
 
-/* (2026-07-13) Expanded floor grid to 13 bays (5 + CR + 6 + CR), was 12 bays */
+/* (2026-07-13) Expanded floor grid to 14 bays (6 + CR + 6 + CR), was 13 bays */
 .unit-grid-12 {
   display: grid;
-  grid-template-columns: repeat(13, minmax(0, 1fr));
-  gap: 6px;
+  grid-template-columns: repeat(14, minmax(0, 1fr));
+  gap: 5px;
 }
 
 /* (2026-07-13) Increased tile height to 70px for breathing room, was 62px */
@@ -1604,11 +1604,26 @@ input {
   }
 }
 
+/* (2026-07-13) Symmetrical optical logo sizing across 1U, 2U, and multi-unit tiles */
 .unit-logo-img {
-  max-height: 22px;
-  max-width: 88%;
+  height: 26px;
   width: auto;
+  max-width: 58px;
   object-fit: contain;
+  object-position: center;
+  flex-shrink: 0;
+}
+
+.unit-tile[data-units="2"] .unit-logo-img {
+  height: 28px;
+  max-width: 96px;
+}
+
+.unit-tile[data-units="3"] .unit-logo-img,
+.unit-tile[data-units="4"] .unit-logo-img,
+.unit-tile[data-units="5"] .unit-logo-img {
+  height: 32px;
+  max-width: 132px;
 }
 
 .unit-name-text {
@@ -1649,23 +1664,23 @@ input {
   justify-content: center;
 }
 
-/* (2026-07-13) Slightly taller parking corridor, was 8px padding */
+/* (2026-07-13) Crisp asphalt parking lot with attached "/" stalls & clear road lanes */
 .street-parking-corridor {
   display: grid;
   grid-template-columns: 108px minmax(0, 1fr);
-  gap: 10px;
+  gap: 12px;
   align-items: center;
-  background: #dce3ec;
-  border: 1px solid #cad4e0;
+  background: #cbd4df;
+  border: 1px solid #b8c4d2;
   border-radius: 10px;
-  padding: 11px 12px;
+  padding: 14px 12px;
 }
 
 .gate-column {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 6px;
+  gap: 12px;
 }
 
 .gate-pill {
@@ -1693,43 +1708,58 @@ input {
 .parking-asphalt-body {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  gap: 6px;
+  justify-content: center;
+  gap: 0;
 }
 
-.parking-stripes-row {
+.parking-bay-grid-13 {
   display: grid;
-  grid-template-columns: repeat(18, 1fr);
-  gap: 5px;
-}
-
-.parking-stripes-row i {
-  height: 13px;
-  border-left: 1.5px solid rgba(255, 255, 255, 0.85);
-  border-right: 1.5px solid rgba(255, 255, 255, 0.85);
-  background: rgba(255, 255, 255, 0.25);
-  border-radius: 2px;
-}
-
-/* (2026-07-13) Matched parking median grid to 13 bays, was 12 bays */
-.median-grid-12 {
-  display: grid;
-  grid-template-columns: repeat(13, minmax(0, 1fr));
+  grid-template-columns: repeat(14, minmax(0, 1fr));
   gap: 5px;
   align-items: center;
 }
 
-/* (2026-07-13) Flat plain gray plant boxes, was 3D gradient with inset shadow */
-.plant-island {
+.parking-bay-group {
+  display: flex;
+  align-items: stretch;
+  padding: 0 7px;
+}
+
+/* (2026-07-13) Minimal pure white "/" stall lines only, removed box fills & curb borders */
+.parking-bay-group i {
+  flex: 1;
+  height: 16px;
+  transform: skewX(-28deg);
+  border-left: 1.5px solid rgba(255, 255, 255, 0.78);
+  background: transparent;
+}
+
+.parking-bay-group i:last-child {
+  border-right: 1.5px solid rgba(255, 255, 255, 0.78);
+}
+
+.parking-road-gap {
   height: 18px;
-  border-radius: 6px;
-  background: #bcc6d2;
-  border: 1px solid #aeb9c7;
+  background: transparent;
+}
+
+.median-grid-12 {
+  display: grid;
+  grid-template-columns: repeat(14, minmax(0, 1fr));
+  gap: 5px;
+  align-items: center;
+}
+
+.plant-island {
+  height: 14px;
+  border-radius: 4px;
+  background: #9aa7b8;
+  border: 1px solid #8593a6;
   box-shadow: none;
 }
 
 .road-cutout {
-  height: 18px;
+  height: 14px;
   background: transparent;
 }
 
