@@ -1400,10 +1400,10 @@ input {
   font-weight: 600;
 }
 
-/* (2026-07-13) Slightly taller tiles & flat matte gray plant boxes, was 54px/3D */
+/* (2026-07-13) Expanded floor grid to 13 bays (5 + CR + 6 + CR), was 12 bays */
 .unit-grid-12 {
   display: grid;
-  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-template-columns: repeat(13, minmax(0, 1fr));
   gap: 6px;
 }
 
@@ -1711,9 +1711,10 @@ input {
   border-radius: 2px;
 }
 
+/* (2026-07-13) Matched parking median grid to 13 bays, was 12 bays */
 .median-grid-12 {
   display: grid;
-  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-template-columns: repeat(13, minmax(0, 1fr));
   gap: 5px;
   align-items: center;
 }
