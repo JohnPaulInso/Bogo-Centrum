@@ -521,18 +521,19 @@ export default function Home() {
 
   const leasableLots = useMemo(() => lots.filter(lot => !lot.isUtility), [lots]);
 
+  // (2026-07-13) Filter only real occupied stores for brand tabs; vacant units shown cleanly in Available Slots
   const directoryLots = useMemo(() => {
-    const cards = leasableLots.filter(lot => lot.status === "occupied" || lot.status === "available");
-    return cards
-      .filter(lot => {
-        if (activeFilter === "All Brands") return true;
-        if (activeFilter === "Building A" || activeFilter === "Building B") return lot.building === activeFilter;
-        if (activeFilter === "Available Slots") return lot.status === "available";
-        if (activeFilter === "Banking & Pawn") return /bank|pawn|remittance|finance|savings/i.test(lot.category);
-        if (activeFilter === "Convenience & Pharmacy") return /convenience|pharmacy|health|supermarket|dermatology/i.test(lot.category);
-        return /retail|wellness|massage|improvement|community|education|office|bpo|dining/i.test(lot.category);
-      })
-      .slice(0, 12);
+    if (activeFilter === "Available Slots") {
+      return leasableLots.filter(lot => lot.status === "available");
+    }
+    const occupied = leasableLots.filter(lot => lot.status === "occupied");
+    return occupied.filter(lot => {
+      if (activeFilter === "All Brands") return true;
+      if (activeFilter === "Building A" || activeFilter === "Building B") return lot.building === activeFilter;
+      if (activeFilter === "Banking & Pawn") return /bank|pawn|remittance|finance|savings/i.test(lot.category);
+      if (activeFilter === "Convenience & Pharmacy") return /convenience|pharmacy|health|supermarket|dermatology|eyewear/i.test(lot.category);
+      return /retail|wellness|massage|improvement|community|education|office|bpo|dining/i.test(lot.category);
+    });
   }, [activeFilter, leasableLots]);
 
   const occupiedCount = useMemo(() => leasableLots.filter(lot => lot.status === "occupied").length, [leasableLots]);
@@ -654,9 +655,10 @@ export default function Home() {
           </a>
           <nav className={`main-nav ${menuOpen ? "nav-open" : ""}`}>
             <a href="#home" onClick={() => setMenuOpen(false)}>Home</a>
+            {/* (2026-07-13) Put Spaces before Site Map in nav, was after Site Map */}
             <a href="#spaces" onClick={() => setMenuOpen(false)}>Spaces</a>
-            <a href="#brands" onClick={() => setMenuOpen(false)}>Directory</a>
             <a href="#map" onClick={() => setMenuOpen(false)}>Site Map</a>
+            <a href="#brands" onClick={() => setMenuOpen(false)}>Directory</a>
             <a href="#leasing" onClick={() => setMenuOpen(false)}>Leasing</a>
             <a href="#updates" onClick={() => setMenuOpen(false)}>Updates</a>
           </nav>
@@ -819,7 +821,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Commercial Spaces Split Section */}
+        {/* (2026-07-13) Moved Spaces above 2D Site Map, was below Site Map */}
         <section id="spaces" className="spaces-section section-space">
           <div className="container spaces-grid">
             <div className="spaces-copy">
@@ -861,200 +863,6 @@ export default function Home() {
                   </div>
                 </button>
               ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Deep Brand Navy Directory Showcase */}
-        <section id="brands" className="dark-directory-section section-space">
-          <div className="container">
-            <div className="directory-hero-split">
-              <div className="directory-feature-photo">
-                <img src="./images/centrum-day-facade.jpg" alt="Bogo City Centrum daytime facade" />
-                <div className="directory-photo-badge">
-                  <MapPin size={14} /> Building A &amp; B · Taytayan, Bogo City
-                </div>
-              </div>
-              <div className="directory-feature-copy">
-                <div className="kicker-bar kicker-light"><span /> THE CENTRUM DIRECTORY</div>
-                <h2>Trusted Brands Serving Northern Cebu</h2>
-                <p>
-                  Browse established national chains and local institutions across both wings, or filter available
-                  commercial lots ready for your next branch.
-                </p>
-                <div className="directory-cta-row">
-                  <button className="accent-button" onClick={() => setActiveFilter("Available Slots")}>
-                    View {availableCount} Open Lots <ArrowRight size={15} />
-                  </button>
-                  <button className="ghost-light-button" onClick={() => setActiveFilter("All Brands")}>
-                    Show All Brands
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <div className="filter-row">
-              {(
-                [
-                  "All Brands",
-                  "Building A",
-                  "Building B",
-                  "Banking & Pawn",
-                  "Convenience & Pharmacy",
-                  "Retail & Wellness",
-                  "Available Slots",
-                ] as Filter[]
-              ).map(filter => (
-                <button
-                  key={filter}
-                  className={`filter-pill ${activeFilter === filter ? "active" : ""}`}
-                  onClick={() => setActiveFilter(filter)}
-                >
-                  {filter}
-                  {filter === "Available Slots" && <span className="filter-count">{availableCount}</span>}
-                </button>
-              ))}
-            </div>
-
-            <div className="brand-grid">
-              {directoryLots.map(lot => (
-                <article
-                  key={lot.id}
-                  className={`brand-card ${lot.status === "available" ? "available-card" : ""}`}
-                  onClick={() => chooseLot(lot)}
-                >
-                  <div className="brand-card-top">
-                    <BrandMark lot={lot} large />
-                    <div className="brand-card-badges">
-                      <span className="lot-code-chip">{lot.id}</span>
-                      <StatusBadge status={lot.status} />
-                    </div>
-                  </div>
-                  <div className="brand-card-content">
-                    <div>
-                      <h3>{lot.brand}</h3>
-                      <p>{lot.category}</p>
-                    </div>
-                    <div className="card-meta">
-                      <span>
-                        {lot.building.replace("Building ", "Bldg ")} ·{" "}
-                        {lot.floor === "Ground Floor" ? "Ground Floor" : "2nd Floor"}
-                      </span>
-                      <strong>
-                        {lot.area} <small>sqm</small>
-                      </strong>
-                    </div>
-                  </div>
-                  {lot.status === "available" ? (
-                    <button
-                      className="text-action green-text"
-                      onClick={event => {
-                        event.stopPropagation();
-                        openInquiry(
-                          `Unit ${lot.id} Leasing Inquiry`,
-                          `${lot.id} · ${lot.building} · ${lot.floor === "Ground Floor" ? "1st Floor" : "2nd Floor"} (${lot.area} sqm)`,
-                          `Hello Bogo City Centrum Leasing Team,\n\nI am interested in leasing Unit ${lot.id} (${lot.building}, ${lot.floor === "Ground Floor" ? "1st Floor" : "2nd Floor"}, approx. ${lot.area} sqm).\n\nPlease send me the monthly lease rate, terms, and site visit availability.`
-                        );
-                      }}
-                    >
-                      Inquire For This Space <ArrowRight size={15} />
-                    </button>
-                  ) : (
-                    <button
-                      className="text-action"
-                      onClick={event => {
-                        event.stopPropagation();
-                        chooseLot(lot);
-                        scrollTo("map");
-                      }}
-                    >
-                      Locate On Map <MapPin size={14} />
-                    </button>
-                  )}
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Clean 4-Column Metrics Strip */}
-        <section className="metrics-band">
-          <div className="container metrics-grid">
-            <div className="metric-cell">
-              <div className="metric-icon icon-blue"><Building2 size={23} /></div>
-              <div>
-                <strong>2</strong>
-                <span>Parallel Wings</span>
-              </div>
-            </div>
-            <div className="metric-cell">
-              <div className="metric-icon icon-green"><Store size={23} /></div>
-              <div>
-                <strong>{occupiedCount}+</strong>
-                <span>Active Anchor Brands</span>
-              </div>
-            </div>
-            <div className="metric-cell">
-              <div className="metric-icon icon-sky"><Landmark size={23} /></div>
-              <div>
-                <strong>{leasableLots.reduce((sum, item) => sum + item.units, 0)}</strong>
-                <span>Commercial Units</span>
-              </div>
-            </div>
-            <div className="metric-cell">
-              <div className="metric-icon icon-blue"><Users size={23} /></div>
-              <div>
-                <strong>100%</strong>
-                <span>Central Plaza Access</span>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Why Choose Centrum Split Showcase */}
-        <section className="why-section section-space">
-          <div className="container why-grid">
-            <div className="why-copy">
-              <div className="kicker-bar"><span /> WHY CHOOSE CENTRUM</div>
-              <h2>Commercial Presence in Every Detail</h2>
-              <p className="section-lede">
-                Crafted with clean modern architecture, warm timber louver accents, covered walkways, and effortless
-                customer parking directly off the Taytayan corridor.
-              </p>
-              <ul className="why-checklist">
-                {[
-                  "High-visibility landmark destination in Taytayan, Bogo City",
-                  "Dedicated central parking plaza directly between both wings",
-                  "Balanced tenant mix across banking, health, retail & wellness",
-                  "Illuminated architectural frontage built for day and evening traffic",
-                ].map(point => (
-                  <li key={point}>
-                    <span className="check-badge"><Check size={13} /></span>
-                    <span>{point}</span>
-                  </li>
-                ))}
-              </ul>
-              <button
-                className="accent-button"
-                onClick={() =>
-                  openInquiry(
-                    "Schedule a Site Visit",
-                    "Taytayan Site Tour",
-                    "Hello Bogo City Centrum Team,\n\nI would like to schedule a site visit at Bogo City Centrum in Taytayan, Bogo City to inspect available commercial units and parking access.\n\nPreferred date/time:"
-                  )
-                }
-              >
-                Schedule a Site Visit <ArrowRight size={16} />
-              </button>
-            </div>
-            <div className="why-visual">
-              <div className="why-photo-frame">
-                <img src="./images/centrum-corner-7eleven.jpg" alt="Bogo City Centrum corner architecture" />
-              </div>
-              <div className="why-caption-card">
-                <strong>Modern · Accessible · Thriving</strong>
-                <span>Taytayan, Bogo City, Cebu</span>
-              </div>
             </div>
           </div>
         </section>
@@ -1526,6 +1334,197 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+        {/* (2026-07-13) Compact scannable Brand Directory, removed bulky cards & extra photo block */}
+        <section id="brands" className="dark-directory-section compact-directory-section">
+          <div className="container">
+            <div className="directory-compact-header">
+              <div>
+                <div className="kicker-bar kicker-light"><span /> STORE DIRECTORY</div>
+                <h2>Stores &amp; Services at Bogo City Centrum</h2>
+              </div>
+              <p className="directory-compact-sub">
+                Click any business to view branch hours, photo, and directions.
+              </p>
+            </div>
+
+            <div className="filter-row">
+              {(
+                [
+                  "All Brands",
+                  "Building A",
+                  "Building B",
+                  "Banking & Pawn",
+                  "Convenience & Pharmacy",
+                  "Retail & Wellness",
+                  "Available Slots",
+                ] as Filter[]
+              ).map(filter => (
+                <button
+                  key={filter}
+                  className={`filter-pill ${activeFilter === filter ? "active" : ""}`}
+                  onClick={() => setActiveFilter(filter)}
+                >
+                  {filter}
+                  {filter === "Available Slots" && <span className="filter-count">{availableCount}</span>}
+                </button>
+              ))}
+            </div>
+
+            {activeFilter === "Available Slots" ? (
+              <div className="vacant-summary-grid">
+                {[
+                  { building: "Building A" as Building, floor: "Ground Floor" as Floor, label: "Building A · 1st Floor" },
+                  { building: "Building B" as Building, floor: "Ground Floor" as Floor, label: "Building B · 1st Floor" },
+                  { building: "Building B" as Building, floor: "Second Floor" as Floor, label: "Building B · 2nd Floor" },
+                ].map(group => {
+                  const openUnits = leasableLots.filter(
+                    l => l.status === "available" && l.building === group.building && l.floor === group.floor
+                  );
+                  if (openUnits.length === 0) return null;
+                  const unitCodes = openUnits.map(u => u.id).join(", ");
+                  return (
+                    <div key={group.label} className="vacant-summary-card">
+                      <div className="vacant-summary-top">
+                        <strong>{group.label}</strong>
+                        <span className="vacant-count-pill">{openUnits.length} Open</span>
+                      </div>
+                      <p className="vacant-summary-codes">Units: {unitCodes}</p>
+                      <div className="vacant-summary-actions">
+                        <button
+                          type="button"
+                          className="vacant-map-link"
+                          onClick={() => {
+                            setFloor(group.floor);
+                            scrollTo("map");
+                          }}
+                        >
+                          <MapPin size={14} /> View on 2D Map
+                        </button>
+                        <button
+                          type="button"
+                          className="accent-button vacant-inquire-sm"
+                          onClick={() =>
+                            openInquiry(
+                              `${group.label} Leasing Inquiry`,
+                              `${group.label} (${openUnits.length} Open Units)`,
+                              `Hello Bogo City Centrum Leasing Team,\n\nI would like to inquire about available commercial units on ${group.label} (Units: ${unitCodes}).\n\nPlease share rates and availability.`
+                            )
+                          }
+                        >
+                          Inquire <ArrowRight size={14} />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="compact-brand-grid">
+                {directoryLots.map(lot => (
+                  <button
+                    key={lot.id}
+                    type="button"
+                    className="compact-brand-row"
+                    onClick={() => chooseLot(lot)}
+                  >
+                    <BrandMark lot={lot} />
+                    <div className="compact-brand-info">
+                      <strong>{lot.brand}</strong>
+                      <span>
+                        {lot.category} · {lot.building.replace("Building ", "Bldg ")} {lot.floor === "Ground Floor" ? "1F" : "2F"}
+                      </span>
+                    </div>
+                    <ArrowRight size={15} className="compact-brand-arrow" />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* Clean 4-Column Metrics Strip */}
+        <section className="metrics-band">
+          <div className="container metrics-grid">
+            <div className="metric-cell">
+              <div className="metric-icon icon-blue"><Building2 size={23} /></div>
+              <div>
+                <strong>2</strong>
+                <span>Parallel Wings</span>
+              </div>
+            </div>
+            <div className="metric-cell">
+              <div className="metric-icon icon-green"><Store size={23} /></div>
+              <div>
+                <strong>{occupiedCount}+</strong>
+                <span>Active Anchor Brands</span>
+              </div>
+            </div>
+            <div className="metric-cell">
+              <div className="metric-icon icon-sky"><Landmark size={23} /></div>
+              <div>
+                <strong>{leasableLots.reduce((sum, item) => sum + item.units, 0)}</strong>
+                <span>Commercial Units</span>
+              </div>
+            </div>
+            <div className="metric-cell">
+              <div className="metric-icon icon-blue"><Users size={23} /></div>
+              <div>
+                <strong>100%</strong>
+                <span>Central Plaza Access</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Why Choose Centrum Split Showcase */}
+        <section className="why-section section-space">
+          <div className="container why-grid">
+            <div className="why-copy">
+              <div className="kicker-bar"><span /> WHY CHOOSE CENTRUM</div>
+              <h2>Commercial Presence in Every Detail</h2>
+              <p className="section-lede">
+                Crafted with clean modern architecture, warm timber louver accents, covered walkways, and effortless
+                customer parking directly off the Taytayan corridor.
+              </p>
+              <ul className="why-checklist">
+                {[
+                  "High-visibility landmark destination in Taytayan, Bogo City",
+                  "Dedicated central parking plaza directly between both wings",
+                  "Balanced tenant mix across banking, health, retail & wellness",
+                  "Illuminated architectural frontage built for day and evening traffic",
+                ].map(point => (
+                  <li key={point}>
+                    <span className="check-badge"><Check size={13} /></span>
+                    <span>{point}</span>
+                  </li>
+                ))}
+              </ul>
+              <button
+                className="accent-button"
+                onClick={() =>
+                  openInquiry(
+                    "Schedule a Site Visit",
+                    "Taytayan Site Tour",
+                    "Hello Bogo City Centrum Team,\n\nI would like to schedule a site visit at Bogo City Centrum in Taytayan, Bogo City to inspect available commercial units and parking access.\n\nPreferred date/time:"
+                  )
+                }
+              >
+                Schedule a Site Visit <ArrowRight size={16} />
+              </button>
+            </div>
+            <div className="why-visual">
+              <div className="why-photo-frame">
+                <img src="./images/centrum-corner-7eleven.jpg" alt="Bogo City Centrum corner architecture" />
+              </div>
+              <div className="why-caption-card">
+                <strong>Modern · Accessible · Thriving</strong>
+                <span>Taytayan, Bogo City, Cebu</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
 
         {/* 4-Step Leasing Process Section */}
         <section id="leasing" className="process-section section-space">
